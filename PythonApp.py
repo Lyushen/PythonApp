@@ -39,7 +39,7 @@ def CardGame():
 
 def CardGame2():
     while True:
-        deck = generate_deck_with_ranks()
+        deck = generate_deck()
         round_wins = 0
         for _ in range(3):  # Three rounds
             card1 = pick_unused_card(deck)
@@ -67,7 +67,7 @@ def CardGame2():
             break
 
 
-def generate_deck_with_ranks():
+def generate_deck():
     suits = ['♥', '♦', '♠', '♣']  # Hearts, Diamonds, Spades, Clubs
     ranks = {
         '2': 2, '3': 3, '4': 4, '5': 5,
@@ -94,7 +94,7 @@ def pick_unused_card(deck):
     unused_indexes = [index for index, card in enumerate(deck) if card["used"] == 0]
     if len(unused_indexes) < 10:
         print("There are less than 10 cards left! Regenerating deck.")
-        return generate_deck_with_ranks()
+        return generate_deck()
     chosen_index = random.choice(unused_indexes)
     deck[chosen_index]["used"] = 1
     return deck[chosen_index]
@@ -103,8 +103,8 @@ def RugbyScore():
     file_name= "rugby_tournament_scores"
     file_path = file_name+".csv"
     file_to_write = file_name+".txt"
-    dataList=ReadFile(file_path)
-    compiledString = ProcessData(dataList) #skip the header
+    data=ReadFile(file_path)
+    compiledString = ProcessData(data) #skip the header
     print(compiledString)
     WriteFile(file_to_write,compiledString)
 
@@ -112,7 +112,7 @@ def ProcessData(data):
     headers=data[0]
     dataList=data[1:]
     #countries = set(country for _, country, _ in dataList) # instead of hardcoding contruies, we create unique list from read contry Data column
-    countries = ["England","France","Ireland","Italy","Scotland","Wales",]
+    countries = ["England","France","Ireland","Italy","Scotland","Wales"]
     country_totals = [0] * 6
     highest_scores = [0] * 6
     players = [""] * 6
@@ -130,7 +130,7 @@ def ProcessData(data):
             players[country_index] = f"{data_fields[0]} {data_fields[1]}" 
             
     for i in range(len(countries)):
-        compiledString += f"### {countries[i]}: ###\nTotal Score: {country_totals[i]}\nHighest Score: {players[i]} scored {highest_scores[i]}\n"
+        compiledString += f"### {countries[i]}: ###\n\tTotal Score: {country_totals[i]}\n\tHighest Score: {players[i]} scored {highest_scores[i]}\n"
     return compiledString
 
 def ReadFile(path):
