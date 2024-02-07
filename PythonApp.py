@@ -1,9 +1,9 @@
 import random
 def Day2():
-    #RugbyScore()
+    RugbyScore()
     #CardGame()
     #CardGame2()
-    Task3()
+    #Task3()
     
 def Task3(): #ListWork
     my_list = [0,1,2,3,4,5,6,7,8,9]
@@ -65,8 +65,7 @@ def CardGame2():
         if play_again == "n":
             break
 
-        
-    
+
 def generate_deck_with_ranks():
     suits = ['♥', '♦', '♠', '♣']  # Hearts, Diamonds, Spades, Clubs
     ranks = {
@@ -76,7 +75,7 @@ def generate_deck_with_ranks():
     }
     deck = [
         {"card": rank + suit, "used": 0, "rank": ranks[rank]} 
-        for suit in suits 
+        for suit in suits
         for rank in ranks
     ]
     return deck
@@ -104,12 +103,15 @@ def RugbyScore():
     file_path = file_name+".csv"
     file_to_write = file_name+".txt"
     dataList=ReadFile(file_path)
-    compiledString = ProcessData(dataList[1:]) #skip the header
+    compiledString = ProcessData(dataList) #skip the header
     print(compiledString)
     WriteFile(file_to_write,compiledString)
 
-def ProcessData(dataList):
-    countries = set(country for _, country, _ in dataList) # instead of hardcoding contruies, we create unique list from read contry Data column
+def ProcessData(data):
+    headers=data[0]
+    dataList=data[1:]
+    #countries = set(country for _, country, _ in dataList) # instead of hardcoding contruies, we create unique list from read contry Data column
+    countries = ["England","France","Ireland","Italy","Scotland","Wales",]
     country_totals = [0] * 6
     highest_scores = [0] * 6
     players = [""] * 6
@@ -120,11 +122,11 @@ def ProcessData(dataList):
         total_score = 0
         country_index = countries.index(data_fields[2])
         for j in range(3, 8):
-            total_score += safe_cast(data_fields[j], int, 0)  # Corrected the use of safe_cast
+            total_score += safe_cast(data_fields[j], int, 0)
         country_totals[country_index] += total_score
         if total_score > highest_scores[country_index]:
             highest_scores[country_index] = total_score
-            players[country_index] = f"{data_fields[0]} {data_fields[1]}"  # Corrected player name retrieval
+            players[country_index] = f"{data_fields[0]} {data_fields[1]}" 
             
     for i in range(len(countries)):
         compiledString += f"### {countries[i]}: ###\nTotal Score: {country_totals[i]}\nHighest Score: {players[i]} scored {highest_scores[i]}\n"

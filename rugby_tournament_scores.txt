@@ -1,0 +1,18 @@
+### England: ###
+Total Score: 114
+Highest Score: William Evans scored 20
+### France: ###
+Total Score: 95
+Highest Score: Gabriel Martin scored 17
+### Ireland: ###
+Total Score: 113
+Highest Score: Ryan Flanagan scored 18
+### Italy: ###
+Total Score: 112
+Highest Score: Alessandro Russo scored 20
+### Scotland: ###
+Total Score: 98
+Highest Score: Duncan Murray scored 20
+### Wales: ###
+Total Score: 99
+Highest Score: Gareth Jones scored 18
