@@ -1,26 +1,26 @@
 import random
 def Day2():
-    RugbyScore()
+    #RugbyScore()
     #CardGame()
-    #CardGame2()
+    CardGame2()
     #Task3()
     
 def Task3(): #ListWork
     my_list = [0,1,2,3,4,5,6,7,8,9]
     print(f"Pure my_list is\n\t{my_list}")
-    print(f"my_list[:]\n\t{my_list[:]}")
-    print(f"my_list[2:6]\n\t{my_list[2:6]}")
-    print(f"my_list[:4]\n\t{my_list[:4]}")
-    print(f"my_list[5:]\n\t{my_list[5:]}")
+    print(f"\tmy_list[:]\n\t\t{my_list[:]}")
+    print(f"\tmy_list[2:6]\n\t\t{my_list[2:6]}")
+    print(f"\tmy_list[:4]\n\t\t{my_list[:4]}")
+    print(f"\tmy_list[5:]\n\t\t{my_list[5:]}")
     print("negative list range")
-    print(f"my_list[-3:]\n\t{my_list[-3:]}")
-    print(f"my_list[-3:] Returns last 3\n\t{my_list[:-2]}")
+    print(f"\tmy_list[-3:]\n\t\t{my_list[-3:]}")
+    print(f"\tmy_list[-3:] Returns last 3\n\t\t{my_list[:-2]}")
     print("stepping in my_list")
-    print(f"my_list[::2]\n\t{my_list[::2]}")
-    print(f"my_list[::-1]\n\t{my_list[::-1]}")
+    print(f"\tmy_list[::2]\n\t\t{my_list[::2]}")
+    print(f"\tmy_list[::-1]\n\t\t{my_list[::-1]}")
     my_string="Hello Python"
     print(f"reverse the string '{my_string}'")
-    print(f"my_string[::-1]\n\t{my_string[::-1]}")
+    print(f"\tmy_string[::-1]\n\t\t{my_string[::-1]}")
 
     
 def CardGame():
@@ -47,9 +47,10 @@ def CardGame2():
 
             answer = AskHL("Do you think the next card will be higher or lower?", ["h", "l"])
             card2 = pick_unused_card(deck)
+
             print(f"We drawn {card2['card']}")
             guess_correct = (answer == "h" and card1["rank"] < card2["rank"]) or (answer == "l" and card1["rank"] > card2["rank"])
-            
+
             if guess_correct:
                 print("Correct guess!")
                 round_wins += 1
