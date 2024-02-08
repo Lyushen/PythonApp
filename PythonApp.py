@@ -1,9 +1,30 @@
-import random
+import random 
+import pygame as pg
 def Day2():
     #RugbyScore()
     #CardGame()
-    CardGame2()
+    #CardGame2()
     #Task3()
+    SnakeGame()
+    
+def SnakeGame():
+    window=800
+    tile_size=50
+    range=1
+    pg.init()
+    screen = pg.display.set_mode((window,window*0.75))
+    clock = pg.time.Clock()
+    running = True
+    player_pos = pg.Vector2(screen.get_width() / 2, screen.get_height() / 2)
+    while running:
+        for event in pg.event.get():
+            print(event)
+            if event.type == pg.QUIT:
+                running = False
+        screen.fill('black')
+        pg.display.flip()
+        pg.draw.rect(screen, "red", pg.Rect(30,30,60,60))
+
     
 def Task3(): #ListWork
     my_list = [0,1,2,3,4,5,6,7,8,9]
