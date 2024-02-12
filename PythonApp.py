@@ -164,11 +164,11 @@ def Day3():
                     withdraw_amount = AskInRange(f"Please enter the amount to withdraw (between €{min_withdraw} and €{max_withdraw}):", [min_withdraw, max_withdraw])
                     if withdraw_amount <= max_withdraw:
                         balance -= withdraw_amount
-                        print(f"Withdrawed {style("€"+str(withdraw_amount),"FAIL")} successful. New balance: {style("€"+str(balance),"OKGREEN")}")
+                        print(f"{style("Withdrawed €-"+str(withdraw_amount)+" successfully","OKGREEN")} . New balance: {style("€"+str(balance),"OKGREEN")}")
                     else:
-                        print("Withdrawal amount exceeds the allowable limit.")
+                        print(style("Withdrawal amount exceeds the allowable limit.","FAIL"))
                 else:
-                    print("Insufficient funds available for withdrawal, considering the minimum balance requirement.")
+                    print(style("Insufficient funds available for withdrawal, considering the minimum balance requirement."),"FAIL")
             is_continue = AskQuestion("Would you like to (C)ontinue or (E)xit?", {"C": "Continue", "E": "Exit"})
             if is_continue == 'e':
                 print(f"Final balance: {style("€"+str(balance),"OKGREEN")}")
