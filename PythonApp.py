@@ -1,6 +1,237 @@
 import random 
 from random import randrange
 import pygame as pg
+def main():
+    #Day2()
+    Day3()
+    
+def Day3():   
+    def Task1():
+        for i in range(1,5):
+            for j in range (i):
+                print("*",end="")
+            print("")
+    
+    def Task2():
+        fruits=["Apple","Orange","Mango"]
+        for fruit in fruits:
+            print(fruit)    
+    
+    def Task3():
+        ocount,ecount=0,0
+        for i in range(1,5):
+            if 1%2==0:
+                ecount+=1
+            else:
+                ccount+=1
+        print("Even Numbers are: ",ecount)
+        print("Odd Numbers are:",ocount)
+        
+    def Task4():
+        number = input("Enter the number: ")
+        int_input = safe_cast(number,int,0)
+        for i in range (1,int_input+1):
+            print(f"{int_input}*{i}={int_input*i}")
+    
+    def Task4Teacher():
+        var=input("Enter the number: ")
+        for i in range(1,int(var)+1):
+            print(f"{var} * {i} = {int(var)*i}")
+    
+    def Task5():
+        var1=input("Enter the number: ")
+        var2=input("Enter until what you want to multiply: ")
+        int_var1=safe_cast(var1,int,0)
+        int_var2=safe_cast(var2,int,0)
+        for i in range(1,int_var2+1):
+            print(f"{int_var1}*{i}={int_var1*i}")
+    
+    def Task6_SimpleCalc():
+        while True:
+            var1=AskInRange("Please enter the first number: ",[0,999999])
+            var2=AskInRange("Please enter the second number: ",[0,999999])
+            operator=AskInRange("Please enter\n1 for (+) addition\n2 for (*) multiplication\n3 for (-) subtraction\n4 for (/) division\n",[1,5])
+            operators={
+                1:"+",
+                2:"*",
+                3:"-",
+                4:"/"
+            }
+            operation_str = f"{var1} {operators[operator]} {var2}"
+            try:
+                result = eval(operation_str)
+                print(f"Calculation of {operation_str} = {result}")
+            except ZeroDivisionError:
+                print("Error: Division by zero is not allowed.")
+            except Exception as e:  # Catches other exceptions including NameError, SyntaxError, etc.
+                print(f"An error occurred: {e}")
+                
+            is_exit=AskInRange("Please enter 1 to Continue... and 0 for Exit: ",[0,1])
+            if (is_exit==0):
+                break
+            
+    def Task7_Cafe():
+        item_list={         "I":["Icecream",5.25],
+                            "C":["Coffee",2.25],
+                            "S":["Shake",3.25]}
+        icecream_flavours={ "S":"Strawberry",
+                            "C":"Chocolate",
+                            "V":"Vanilla"}
+        coffee_flavours={   "S":"Strawberry",
+                            "C":"Chocolate",
+                            "V":"Vanilla"}
+        order_sum=0.0
+        order_items = []  
+        def ConfirmOrder(order_items,prnt='no'):
+            print("\nYour current order includes:")
+            for idx, item in enumerate(order_items, start=1):
+                print(f"{idx}. {item}")
+            if prnt=='no':
+                confirmation = AskQuestion("Would you like to (C)ontinue, (F)inish the order or (E)dit it? ",{"C":"Continue","F":"Finish","E":"Edit"})
+            return confirmation
+        while True:
+            order = AskQuestion("What would you like to order?", item_list)
+            if order == "I":
+                flavour = AskQuestion("What flavour for the icecream you prefer?", icecream_flavours)
+                order_items.append(f"{item_list[order][0]} with {icecream_flavours[flavour]} flavour - ${item_list[order][1]}")
+            elif order == "C":
+                flavour = AskQuestion("What flavour for the coffee you prefer?", coffee_flavours)
+                order_items.append(f"{item_list[order][0]} with {coffee_flavours[flavour]} flavour - ${item_list[order][1]}")
+            else:
+                flavour = "None"
+                order_items.append(f"{item_list[order][0]} - ${item_list[order][1]}")
+            order_sum += item_list[order][1]
+            confirmation = ConfirmOrder(order_items)
+            if confirmation == 'c':
+                break
+            elif confirmation == "e":
+                ConfirmOrder(order_items,'yes')
+                delete_item = AskInRange("Which item number would you like to delete (1 for first item, etc.)? ",[1,len(order_items)])
+                deleted_item = order_items.pop(delete_item)
+                deleted_price = float(deleted_item.split("€")[-1])
+                order_sum -= deleted_price
+                print(f"Deleted: {deleted_item}")
+                
+
+        print("\nFinal order:")
+        for item in order_items:
+            print(item)
+        print(f"Total sum: €{order_sum:.2f}")
+        
+    def Task8_ToCelsius():
+        var1=AskInRange("Please enter the Temperature° in Fahrenheit: ",[-99999,99999])
+        try:
+            celcius= (var1 - 32) * 5 / 9
+            print(f"{round(var1,1)}° Fahrenheit is {round(celcius,1)}°")
+        except Exception as e:
+            print(f"An error occurred: {e}")
+               
+    def Task9_Banking():
+        current_opening_minimal=100.0
+        savings_opening_minimal=500.0
+        current_withdraw_maximum=1000.0
+        savings_withdraw_maximum=2500.0
+        minimum_balance=500.0
+        balance=0.0
+        min_withdraw = 5  # Minimum withdrawal amount set to €5
+        #user_init = AskQuestion("Would you like to open an account?")
+        #if user_init == 'n':
+        #    print('Thank you for visiting our bank. Farewell')
+        #    return
+        user_account_type = AskQuestion("Would you like to open a (C)urrent Account or (S)avings Account?", {"C": "Current", "S": "Savings"})
+        if user_account_type == 'c':
+            deposit_sum = AskInRange(f"For Current Account there is a minimum deposit of €{current_opening_minimal}. Please enter the amount:", [current_opening_minimal, 99999999.0])
+            balance+=deposit_sum
+        else:
+            deposit_sum = AskInRange(f"For Savings Account there is a minimum deposit of €{savings_opening_minimal}. Please enter the amount:", [savings_opening_minimal, 99999999.0])
+            balance+=deposit_sum
+        while True:
+            print(f'Your balance is {style("€"+str(balance),"OKGREEN")}')
+
+            action = AskQuestion(f"Would you like to make a {style("Deposit","OKGREEN")} or {style("Withdraw","WARNING")}?", {"D": "Deposit", "W": "Withdraw"})
+            print(f"DEBUG: Value of action is {action}")
+            if action == 'd':  # Deposit logic
+                deposit_sum = AskInRange("Please enter the amount to deposit:", [0.01, 99999999.0])
+                balance += deposit_sum
+            else:  # Withdraw logic
+                if balance - minimum_balance > 5:  # Ensure there's enough balance to withdraw more than €5 and maintain minimum balance
+                    available_to_withdraw = balance-minimum_balance  # Calculate how much is available to withdraw after maintaining minimum balance
+                    if user_account_type == 'c':  # Current Account
+                        max_withdraw = min(current_withdraw_maximum, available_to_withdraw)
+                    else:  # Savings Account
+                        max_withdraw = min(savings_withdraw_maximum, available_to_withdraw)
+                    
+                    withdraw_amount = AskInRange(f"Please enter the amount to withdraw (between €{min_withdraw} and €{max_withdraw}):", [min_withdraw, max_withdraw])
+                    if withdraw_amount <= max_withdraw:
+                        balance -= withdraw_amount
+                        print(f"Withdrawed {style("€"+str(withdraw_amount),"FAIL")} successful. New balance: {style("€"+str(balance),"OKGREEN")}")
+                    else:
+                        print("Withdrawal amount exceeds the allowable limit.")
+                else:
+                    print("Insufficient funds available for withdrawal, considering the minimum balance requirement.")
+            is_continue = AskQuestion("Would you like to (C)ontinue or (E)xit?", {"C": "Continue", "E": "Exit"})
+            if is_continue == 'e':
+                print(f"Final balance: {style("€"+str(balance),"OKGREEN")}")
+                break
+
+    #Task1()
+    #Task2()
+    #Task3()
+    #Task4()
+    #Task4Teacher()
+    #Task5()
+    #Task6_SimpleCalc()
+    #Task7_Cafe()
+    #Task8_ToCelsius()
+    Task9_Banking()
+
+def AskInRange(message, range_limits=[1.0, 5.0]):
+    while True:
+        var1 = input(message + "\n")
+        try:
+            converted = float(var1)
+            if converted >= min(range_limits) and converted <= max(range_limits):
+                return converted
+            else:
+                # Explicitly converting float to str for safe concatenation
+                print("Input is out of range, please enter a number between " + str(min(range_limits)) + " and " + str(max(range_limits)) + ".")
+        except ValueError:
+            print("Invalid input: Please enter a valid number.")
+
+def AskQuestion(message, possible_answers={'Y': 'Yes', 'N': 'No'}):
+    options_str = ', '.join([f"({key}) for {value}" for key, value in possible_answers.items()])
+    full_message = f"{message} Possible answers are {options_str}."
+    possible_answers_lower = {key.lower(): value for key, value in possible_answers.items()}
+    while True:
+        print(full_message) 
+        user_input = input().lower() 
+        possible_answers_lower = {key.lower(): value for key, value in possible_answers.items()}
+        if user_input in possible_answers_lower:
+            for original_key in possible_answers:
+                if original_key.lower() == user_input:
+                    return original_key.lower()
+        else:
+            print(f"Incorrect input. Please enter one of the following options: {options_str}")
+
+def style(message, style):
+    style_name = style.upper()
+    style_attribute = getattr(bcolors, style_name, None)
+    str_message=str(message)
+    if style_attribute is None:
+        return  str_message # Return the original message if the style is not found
+    return style_attribute + str_message + bcolors.ENDC
+
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKCYAN = '\033[96m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
 def Day2():
     #RugbyScore()
     #CardGame()
@@ -229,7 +460,6 @@ def SnakeTwoPlayers():
 
         pg.display.flip()
         clock.tick(60)  # Consistent 60 fps
-
     
 def Task3(): #ListWork
     my_list = [0,1,2,3,4,5,6,7,8,9]
@@ -247,8 +477,7 @@ def Task3(): #ListWork
     my_string="Hello Python"
     print(f"reverse the string '{my_string}'")
     print(f"\tmy_string[::-1]\n\t\t{my_string[::-1]}")
-
-    
+   
 def CardGame():
     cards_not_used = [0]*52
     minumum_cards = 10
@@ -379,4 +608,4 @@ def safe_cast(value, to_type, default=None):
     except (ValueError, TypeError):
         return default
 
-Day2()
+main()
