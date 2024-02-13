@@ -1,9 +1,193 @@
 import random 
-from random import randrange
 import pygame as pg
+import ExternalFuncs #import my own library
+from ExternalFuncs import ask_in_range
+from ExternalFuncs import ask_a_question
+from ExternalFuncs import style
+from ExternalFuncs import extract_keys
+from ExternalFuncs import extract_keys_with_numbers
+
+
 def main():
     #Day2()
-    Day3()
+    #Day3()
+    Day4()
+    
+def Day4():
+    def Task1():
+        my_list=[1,2,3,4,5]
+        print("Print element 2nd element from my_list[2]"+my_list[2])
+        print("Print element on -1 index from my_list[-1]"+my_list[-1])
+        print("Print len() of my_list"+len(my_list))
+    
+    def Task2():
+        user_list=[]
+        itterations = 10
+        var=0   
+        for i in range(itterations):
+            var = ask_in_range(f"Please input the {i+1} value: ", [-99999, 99999])
+            if var % 2 != 0:
+                value_to_append = var + 1
+            else:
+                value_to_append = var
+            user_list.append(value_to_append)
+        user_list.sort()
+        print(user_list)
+        
+    def Task3():
+        user_list=[]
+        itterations = 10
+        for i in range(itterations):
+            user_list.append(ask_in_range(f"Please input the {i+1} value", [-99999, 99999],int))
+        #user_list.sort()
+        user_list2,user_list3=user_list,user_list
+        for x,i in enumerate(user_list):
+            for y,j in enumerate(user_list):
+                if i<j:
+                    user_list[x],user_list[y]=user_list[y],user_list[x] #without temp var
+        for x,i in enumerate(user_list2): #my version
+            for y,j in enumerate(user_list2):
+                if i<j:
+                    temp_value=user_list2[x]
+                    user_list2[x]=user_list2[y]
+                    user_list2[y]=temp_value
+        for i in range(len(user_list3)): #teacher's version
+           for j in range(len(user_list3)):
+               if user_list3[i]<user_list3[j]:
+                   temp_value=user_list3[i]
+                   user_list3[i]=user_list3[j]
+                   user_list3[j]=temp_value
+        print(str(user_list)+"\n"+str(user_list2)+"\n"+str(user_list3))
+    
+    def Task4(): #Sum and average
+        user_list=[]
+        itterations = 10
+        for i in range(itterations):
+            user_list.append(ask_in_range(f"Please input the {i+1} value", [-99999, 99999],int))
+        sum=0
+        for i in user_list:
+            sum+=i
+        # sum=sum(user_list)
+        # average=avr
+        average=sum/len(user_list)
+        print(f"User_list: {user_list}\nAverage: {str(average)}\nSum: {str(sum)}")
+        
+    def Task5(): #Dictionary Practice
+        dict_one={
+            "name":"abc",
+            "course":"oop"
+        }
+        print(dict_one)
+        dict_one["course"]="OOP"
+        print(dict_one)
+        dict_one["email"]="abc@abc.com"
+        print(dict_one.keys())
+        new_name={"name":"def"}
+        dict_one.update(new_name)
+        print(dict_one)
+        
+    def Task6(): #sale tax
+        # Write a program wich would calculate the sales tax on two products by the name of Toothpaste and Shampoo.
+        # First the user would be asked for the product type.
+        # Once the user selects the product then ask them about the price of the product.
+        # For the product, if the price is less than 50, clculate 3% sales tax, more than 50 and less than 100 then calculate 5% sales tax on the product.
+        # If price is more than 100, calculate 10% sale tax.
+        # Then display the sales tax to the user and total amount including sale tax
+        ## give user an option if user wants to buy an other product
+        
+        tax_low_rate=3
+        tax_mid_rate=5
+        tax_high_rate=10
+        CUR="€"
+        products={
+            "Toothpaste":55.25,
+            "Shampoo":43.11,
+            "Toilet Paper":150
+        }
+        order_list={}
+        total_sum=0.00
+        while True:
+            order_list.update(order_a_product("Please select the product",products))
+            print("\nYour current order includes:")
+            for order in order_list:
+                for key in order:
+                    print(order[key]['Formatted'])
+            continue_finish_or_edit=ask_a_question("Would you like to (C)ontinue, (F)inish the order or (E)dit it? ",{"C":"Continue","F":"Finish","E":"Edit"})
+            if continue_finish_or_edit=="f":
+                print("\nFinal order:")
+                for order in order_list:
+                    for key in order:
+                        print(order[key]['Formatted'])
+                        total_sum += order[key]['Price']
+                print(f"Total sum: €{total_sum:.2f}")
+                return
+            elif continue_finish_or_edit=="e":
+                order_list=edit_order(order_list)
+            else:
+                break
+
+        def edit_order(user_orders):
+            print("Current order:")
+            for order in user_orders:
+                for key in order:
+                    print(order[key]['Formatted'])
+            position_to_remove = ask_in_range("Enter the position number of the product you want to delete: ",[1,len(user_orders)+1])
+            del user_orders[position_to_remove - 1]
+            return user_orders
+                    
+        def order_a_product(message, products):
+            # Generate a list of formatted product strings for display
+            options_list = [f"{idx + 1}. {name} - {price}" for idx, (name, price) in enumerate(products.items())]
+            options_str = '\n'.join(options_list)
+            full_message = f"{message}\nPossible options are:\n{options_str}"
+
+            while True:
+                print(full_message)
+                user_input = input("Enter the number of your choice: ")
+                try:
+                    selected_index = int(user_input) - 1  # Convert to zero-based index
+                    if 0 <= selected_index < len(products):
+                        selected_product = list(products.items())[selected_index]
+                        return {
+                            str(selected_index + 1): {
+                                "Name": selected_product[0],
+                                "Price": selected_product[1],
+                                "Formatted": f"{selected_index + 1}. {selected_product[0]} - {selected_product[1]}"
+                            }
+                        }
+                    else:
+                        print("Selection out of range. Please enter a valid option number.")
+                except ValueError:
+                    print("Invalid input. Please enter a number.")
+    
+    def Task7():
+        # write a program in which a father wants to know the grate of his two sons. Ask the user for the marks.
+        # 95-100 - A+
+        # 90-94 - A
+        # 85-89 - A-
+        sons_grades={}
+        amount_of_sons=ask_in_range("How many sons do you have?",[1,99],int)
+        for i in range(amount_of_sons):
+            sons_grades.update({f"Son {i}":ask_in_range(f"Please enther the grade for the Son {i}:",[0,100],int)})
+        print(sons_grades)
+        for name, grade in sons_grades.items():
+            print(f"For {name}, the grade is {grade}.")
+                
+
+        print()
+    def get_grade_category(score):
+        grades=["A+","A", "A-", "B+", "B", "B-", "C+", "C", "C-", "D+", "D", "D-", "F+", "F", "F-","F--"]
+        scale=100
+        index = (score / (scale / len(grades)))
+        index = min(index, len(grades) - 1)
+        return grades[index]
+    #Task1()
+    #Task2()
+    #Task3()
+    #Task4()
+    #Task5()
+    #Task6()
+    Task7()
     
 def Day3():   
     def Task1():
@@ -48,9 +232,9 @@ def Day3():
     
     def Task6_SimpleCalc():
         while True:
-            var1=AskInRange("Please enter the first number: ",[0,999999])
-            var2=AskInRange("Please enter the second number: ",[0,999999])
-            operator=AskInRange("Please enter\n1 for (+) addition\n2 for (*) multiplication\n3 for (-) subtraction\n4 for (/) division\n",[1,5])
+            var1=ask_in_range("Please enter the first number: ",[0,999999])
+            var2=ask_in_range("Please enter the second number: ",[0,999999])
+            operator=ask_in_range("Please enter\n1 for (+) addition\n2 for (*) multiplication\n3 for (-) subtraction\n4 for (/) division\n",[1,5])
             operators={
                 1:"+",
                 2:"*",
@@ -66,7 +250,7 @@ def Day3():
             except Exception as e:  # Catches other exceptions including NameError, SyntaxError, etc.
                 print(f"An error occurred: {e}")
                 
-            is_exit=AskInRange("Please enter 1 to Continue... and 0 for Exit: ",[0,1])
+            is_exit=ask_in_range("Please enter 1 to Continue... and 0 for Exit: ",[0,1])
             if (is_exit==0):
                 break
             
@@ -87,15 +271,15 @@ def Day3():
             for idx, item in enumerate(order_items, start=1):
                 print(f"{idx}. {item}")
             if prnt=='no':
-                confirmation = AskQuestion("Would you like to (C)ontinue, (F)inish the order or (E)dit it? ",{"C":"Continue","F":"Finish","E":"Edit"})
+                confirmation = ask_a_question("Would you like to (C)ontinue, (F)inish the order or (E)dit it? ",{"C":"Continue","F":"Finish","E":"Edit"})
             return confirmation
         while True:
-            order = AskQuestion("What would you like to order?", item_list)
+            order = ask_a_question("What would you like to order?", item_list)
             if order == "I":
-                flavour = AskQuestion("What flavour for the icecream you prefer?", icecream_flavours)
+                flavour = ask_a_question("What flavour for the icecream you prefer?", icecream_flavours)
                 order_items.append(f"{item_list[order][0]} with {icecream_flavours[flavour]} flavour - ${item_list[order][1]}")
             elif order == "C":
-                flavour = AskQuestion("What flavour for the coffee you prefer?", coffee_flavours)
+                flavour = ask_a_question("What flavour for the coffee you prefer?", coffee_flavours)
                 order_items.append(f"{item_list[order][0]} with {coffee_flavours[flavour]} flavour - ${item_list[order][1]}")
             else:
                 flavour = "None"
@@ -106,7 +290,7 @@ def Day3():
                 break
             elif confirmation == "e":
                 ConfirmOrder(order_items,'yes')
-                delete_item = AskInRange("Which item number would you like to delete (1 for first item, etc.)? ",[1,len(order_items)])
+                delete_item = ask_in_range("Which item number would you like to delete (1 for first item, etc.)? ",[1,len(order_items)])
                 deleted_item = order_items.pop(delete_item)
                 deleted_price = float(deleted_item.split("€")[-1])
                 order_sum -= deleted_price
@@ -119,7 +303,7 @@ def Day3():
         print(f"Total sum: €{order_sum:.2f}")
         
     def Task8_ToCelsius():
-        var1=AskInRange("Please enter the Temperature° in Fahrenheit: ",[-99999,99999])
+        var1=ask_in_range("Please enter the Temperature° in Fahrenheit: ",[-99999,99999])
         try:
             celcius= (var1 - 32) * 5 / 9
             print(f"{round(var1,1)}° Fahrenheit is {round(celcius,1)}°")
@@ -131,46 +315,44 @@ def Day3():
         savings_opening_minimal=500.0
         current_withdraw_maximum=1000.0
         savings_withdraw_maximum=2500.0
+        min_withdraw = 5  # Minimum withdrawal amount €5
         minimum_balance=500.0
-        balance=0.0
-        min_withdraw = 5  # Minimum withdrawal amount set to €5
-        #user_init = AskQuestion("Would you like to open an account?")
-        #if user_init == 'n':
+        balance=0.00
+        #if AskQuestion("Would you like to open a Bank Account?") == 'n':
         #    print('Thank you for visiting our bank. Farewell')
         #    return
-        user_account_type = AskQuestion("Would you like to open a (C)urrent Account or (S)avings Account?", {"C": "Current", "S": "Savings"})
-        if user_account_type == 'c':
-            deposit_sum = AskInRange(f"For Current Account there is a minimum deposit of €{current_opening_minimal}. Please enter the amount:", [current_opening_minimal, 99999999.0])
-            balance+=deposit_sum
+        current_or_savings_account = ask_a_question("Would you like to open a (C)urrent Account or (S)avings Account?", {"C": "Current", "S": "Savings"})
+        if current_or_savings_account == 'c':
+            balance+= ask_in_range(f"For Current Account there is a minimum deposit of €{current_opening_minimal}. Please enter the amount:", [current_opening_minimal, 99999999.0])
         else:
-            deposit_sum = AskInRange(f"For Savings Account there is a minimum deposit of €{savings_opening_minimal}. Please enter the amount:", [savings_opening_minimal, 99999999.0])
-            balance+=deposit_sum
+            balance+= ask_in_range(f"For Savings Account there is a minimum deposit of €{savings_opening_minimal}. Please enter the amount:", [savings_opening_minimal, 99999999.0])
         while True:
             print(f'Your balance is {style("€"+str(balance),"OKGREEN")}')
-
-            action = AskQuestion(f"Would you like to make a {style("Deposit","OKGREEN")} or {style("Withdraw","WARNING")}?", {"D": "Deposit", "W": "Withdraw"})
-            print(f"DEBUG: Value of action is {action}")
-            if action == 'd':  # Deposit logic
-                deposit_sum = AskInRange("Please enter the amount to deposit:", [0.01, 99999999.0])
+            deposit_or_withdraw = ask_a_question(f"Would you like to make a {style("Deposit","OKGREEN")} or {style("Withdraw","WARNING")}?", {"D": "Deposit", "W": "Withdraw"})
+            #print(f"DEBUG: Value of action is {action}")
+            if deposit_or_withdraw == 'd':  # Deposit logic
+                deposit_sum = ask_in_range("Please enter the amount to deposit:", [0.01, 99999999.0])
                 balance += deposit_sum
             else:  # Withdraw logic
                 if balance - minimum_balance > 5:  # Ensure there's enough balance to withdraw more than €5 and maintain minimum balance
                     available_to_withdraw = balance-minimum_balance  # Calculate how much is available to withdraw after maintaining minimum balance
-                    if user_account_type == 'c':  # Current Account
+                    if current_or_savings_account == 'c':  # Current Account
                         max_withdraw = min(current_withdraw_maximum, available_to_withdraw)
                     else:  # Savings Account
                         max_withdraw = min(savings_withdraw_maximum, available_to_withdraw)
                     
-                    withdraw_amount = AskInRange(f"Please enter the amount to withdraw (between €{min_withdraw} and €{max_withdraw}):", [min_withdraw, max_withdraw])
+                    withdraw_amount = ask_in_range(f"Please enter the amount to withdraw (between €{min_withdraw} and €{max_withdraw}):", [min_withdraw, max_withdraw])
                     if withdraw_amount <= max_withdraw:
                         balance -= withdraw_amount
-                        print(f"{style("Withdrawed €-"+str(withdraw_amount)+" successfully","OKGREEN")} . New balance: {style("€"+str(balance),"OKGREEN")}")
+                        print(f"{style("Withdrawed €-"+str(withdraw_amount)+" successfully","OKGREEN")}. New balance: {style("€"+str(balance),"OKGREEN")}")
                     else:
                         print(style("Withdrawal amount exceeds the allowable limit.","FAIL"))
                 else:
-                    print(style("Insufficient funds available for withdrawal, considering the minimum balance requirement."),"FAIL")
-            is_continue = AskQuestion("Would you like to (C)ontinue or (E)xit?", {"C": "Continue", "E": "Exit"})
-            if is_continue == 'e':
+                    if current_or_savings_account == 'c':
+                        print(style(f"Insufficient funds available for withdrawal, considering the minimum balance for Current Account is €{minimum_balance}. Your balance: {style("€"+str(balance),"OKGREEN")}","FAIL"))
+                    else:
+                        print(style(f"Insufficient funds available for withdrawal, considering the minimum balance for Savings Account is €{minimum_balance}. Your balance: {style("€"+str(balance),"OKGREEN")}","FAIL"))
+            if ask_a_question("Would you like to (C)ontinue or (E)xit?", {"C": "Continue", "E": "Exit"}) == 'e':
                 print(f"Final balance: {style("€"+str(balance),"OKGREEN")}")
                 break
 
@@ -185,70 +367,23 @@ def Day3():
     #Task8_ToCelsius()
     Task9_Banking()
 
-def AskInRange(message, range_limits=[1.0, 5.0]):
-    while True:
-        var1 = input(message + "\n")
-        try:
-            converted = float(var1)
-            if converted >= min(range_limits) and converted <= max(range_limits):
-                return converted
-            else:
-                # Explicitly converting float to str for safe concatenation
-                print("Input is out of range, please enter a number between " + str(min(range_limits)) + " and " + str(max(range_limits)) + ".")
-        except ValueError:
-            print("Invalid input: Please enter a valid number.")
-
-def AskQuestion(message, possible_answers={'Y': 'Yes', 'N': 'No'}):
-    options_str = ', '.join([f"({key}) for {value}" for key, value in possible_answers.items()])
-    full_message = f"{message} Possible answers are {options_str}."
-    possible_answers_lower = {key.lower(): value for key, value in possible_answers.items()}
-    while True:
-        print(full_message) 
-        user_input = input().lower() 
-        possible_answers_lower = {key.lower(): value for key, value in possible_answers.items()}
-        if user_input in possible_answers_lower:
-            for original_key in possible_answers:
-                if original_key.lower() == user_input:
-                    return original_key.lower()
-        else:
-            print(f"Incorrect input. Please enter one of the following options: {options_str}")
-
-def style(message, style):
-    style_name = style.upper()
-    style_attribute = getattr(bcolors, style_name, None)
-    str_message=str(message)
-    if style_attribute is None:
-        return  str_message # Return the original message if the style is not found
-    return style_attribute + str_message + bcolors.ENDC
-
-class bcolors:
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKCYAN = '\033[96m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
-
 def Day2():
     #RugbyScore()
     #CardGame()
     #CardGame2()
     #Task3()
     #SnakeGame()
-    SnakeTwoPlayers()
+    snake_for_two_players()
     
-def SnakeGame(): # One Player Snake
+def snake_game(): # One Player Snake
     tile_size = 25
     window_width = 800
     window_height = 600
     x_range = (tile_size // 2, window_width - tile_size // 2)
     y_range = (tile_size // 2, window_height - tile_size // 2)
     def get_random_position():
-        x_position = randrange(x_range[0], x_range[1], tile_size)
-        y_position = randrange(y_range[0], y_range[1], tile_size)
+        x_position = random.randrange(x_range[0], x_range[1], tile_size)
+        y_position = random.randrange(y_range[0], y_range[1], tile_size)
         return [x_position, y_position]
     snake = pg.rect.Rect([0,0,tile_size-2,tile_size-2])
     snake.center=get_random_position()
@@ -323,7 +458,7 @@ def SnakeGame(): # One Player Snake
         pg.display.flip()
         clock.tick(60) # Consistent 60 fps
 
-def SnakeTwoPlayers():
+def snake_for_two_players():
     tile_size = 25
     window_width = 800
     window_height = 600
@@ -331,8 +466,8 @@ def SnakeTwoPlayers():
     y_range = (tile_size // 2, window_height - tile_size // 2)
 
     def get_random_position():
-        x_position = randrange(x_range[0], x_range[1], tile_size)
-        y_position = randrange(y_range[0], y_range[1], tile_size)
+        x_position = random.randrange(x_range[0], x_range[1], tile_size)
+        y_position = random.randrange(y_range[0], y_range[1], tile_size)
         return [x_position, y_position]
 
     # Initialize the first snake
@@ -478,21 +613,21 @@ def Task3(): #ListWork
     print(f"reverse the string '{my_string}'")
     print(f"\tmy_string[::-1]\n\t\t{my_string[::-1]}")
    
-def CardGame():
+def card_game():
     cards_not_used = [0]*52
     minumum_cards = 10
     while (len(cards_not_used)-minumum_cards):
-        answer = AskHL("Do you think next card will be higher or lower?").lower()
+        higher_or_lower = ask_a_question("Do you think next card will be higher or lower?",{'H':'Higher','L':'Lower'})
         unused_indexes = [index for index, value in enumerate(cards_not_used) if value == 0]
         if unused_indexes>minumum_cards:
             break
         chosen_index = random.choice(unused_indexes)
         cards_not_used[chosen_index] = 1
 
-        if answer == "h":
+        if higher_or_lower == "h":
             print()
 
-def CardGame2():
+def card_game_v2():
     while True:
         deck = generate_deck()
         round_wins = 0
@@ -500,11 +635,11 @@ def CardGame2():
             card1 = pick_unused_card(deck)
             print(f"We drawn {card1['card']}")
 
-            answer = AskHL("Do you think the next card will be higher or lower?", ["h", "l"])
+            higher_or_lower = ask_a_question("Do you think next card will be higher or lower?",{'H':'Higher','L':'Lower'})
             card2 = pick_unused_card(deck)
 
             print(f"We drawn {card2['card']}")
-            guess_correct = (answer == "h" and card1["rank"] < card2["rank"]) or (answer == "l" and card1["rank"] > card2["rank"])
+            guess_correct = (higher_or_lower == "h" and card1["rank"] < card2["rank"]) or (higher_or_lower == "l" and card1["rank"] > card2["rank"])
 
             if guess_correct:
                 print("Correct guess!")
@@ -517,7 +652,7 @@ def CardGame2():
         else:
             print("You lost the round.")
 
-        play_again = AskHL("Do you want to play another round? (Y)es or (N)o", ["y", "n"])
+        play_again = ask_a_question("Do you want to play another round? (Y)es or (N)o", {'H':'Higher','L':'Lower'})
         if play_again == "n":
             break
 
@@ -534,15 +669,6 @@ def generate_deck():
         for rank in ranks
     ]
     return deck
-
-def AskHL(text, possible_answers):
-    print(text)
-    while True:
-        answer = input().lower()
-        if answer in possible_answers:
-            return answer
-        else:
-            print("Invalid input. Please try again.")
 
 def pick_unused_card(deck):
     unused_indexes = [index for index, card in enumerate(deck) if card["used"] == 0]
