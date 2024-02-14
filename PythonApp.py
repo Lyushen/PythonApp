@@ -7,11 +7,53 @@ from ExternalFuncs import style
 from ExternalFuncs import extract_keys
 from ExternalFuncs import extract_keys_with_numbers
 
+import pyodbc
+#import mysql connector
+import contextlib
+
 
 def main():
     #Day2()
     #Day3()
-    Day4()
+    #Day4()
+    Day5()
+    
+def Day5():
+    # Create an application for ABC company, database ABC_Company and a table Employee 
+    # Name, Address, Email, Salary, Department
+    # in the company there are HR, Finance, IT, Sales and each department has 5 employees
+    # 1. Show a List of Employees working in IT department
+    # 2. Show the Name, Address and Email of employee from Dublin
+    # 3. Show the Name, Department and Salary in the 25-50k range
+    # 4. Update the department name of employee from Sales to Finance
+    # 5. Delete 1 Employee from the Sales departments
+    driver='{SQL Server}'
+    server='localhost/localdb'
+    server3='localhost'
+    server2='localdb'
+    database='ONAssignmentB'
+    connection_string=f"Driver={{ODBC Driver 17 for SQL Server}};Server={server};Database={database}" #;Uid={username};Pwd={password}
+    #db_con = pyodbc.connect(driver=driver, server=server, database=database,trusted_connection='yes')
+    #cursor = db_con.cursor()
+    execute_code="SELECT * FROM Customer"
+    
+    @contextlib.contextmanager
+    def use_connection():
+        try:
+            connection = pyodbc.connect(connection_string)
+            yield connection
+        except Exception as e:
+            print(f"Error connecting to LocalDB: {e}")
+        finally:
+            if connection:
+                connection.close()
+    # Example usage
+    with use_connection() as connection:
+        cursor = connection.cursor()
+        cursor.execute(execute_code)
+        rows = cursor.fetchall()
+        print(rows)
+    print()
     
 def Day4():
     def Task1():
