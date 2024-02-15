@@ -1,3 +1,4 @@
+
 import random 
 import pygame as pg
 import ExternalFuncs #import my own library
@@ -6,18 +7,165 @@ from ExternalFuncs import ask_a_question
 from ExternalFuncs import style
 from ExternalFuncs import extract_keys
 from ExternalFuncs import extract_keys_with_numbers
+from ExternalFuncs import Timer
 
 import pyodbc
 #import mysql connector
 import contextlib
 
-
 def main():
+    timer = Timer(1)
+    timer.start()
     #Day2()
     #Day3()
     #Day4()
-    Day5()
+    #Day5()
+    Day6()
+    timer.stop()
+   
+def Day6():
+    # Assessment Scenario: Given a CSV File containing employee names, departments and daily hours worked for a week, create a programme which calculates the 
+    # total workforce effort for the week by department
+    # The program should generate a simple text file containing a breakdown by department showing average hours worked, total hours worked and employee with most hours.
+    # OrganisationWeeklyTimesheet.csv
+    # Employee, Department, Mon, Tue, Wed, Thur, Fri
+    # John Doe, Management, 8, 7.5, 8, 6, 5
+    # Jane Doe, Management, 7.5, 8, 6, 5, 8
+    # Jack Smith, Marketing, 6, 6, 6, 6, 6
+    # Mary Smith, Engineering, 7, 7,7,7,2
+    # Alex Murphy, Engineering, 7.5, 6.5, 7, 8, 6
+    # Organisation Department Totals.txt
+    # Department Engineering
+    # Total Hours Worked by Department: 65 Hours
+    # Average Hours Worked by Employees: 32.5 Hours
+    # Employee with Most Hours Worked: Alex Murphy
+    # ...cont'd.
+    file_name='SD-TA-001-A_OrganisationWeeklyTimesheet'
+    work_director='IOFiles\\'
+    input_csv_fpath=work_director+file_name+'.csv'
+    output_csv_fpath=work_director+'output_'+file_name+'.csv'
+    output_txt_fpath=work_director+file_name+'.txt'
+    #print(input_csv_file_path)
     
+    headers,data=read_file(input_csv_fpath)
+    #display(headers,data)
+    #headers,data=to_int_days(headers,data)
+    
+    # for row in data:
+    #     if row['EmployeeName'] == 'John Smith':
+    #         row['EmployeeName'] = 'John Tobin'  # Modify the John Smith's name
+    
+    compiled_txt=compile_the_data_optimized(headers,data)
+    print(compiled_txt)
+    compiled_txt=compile_the_data(headers,data)
+    print(compiled_txt)
+    #write_csv_file(output_csv_fpath,headers,data)
+
+def compile_the_data(headers,data):
+    print('Not Optimized version')
+    timer2 = Timer(2)
+    timer2.start()
+    compiled_txt=''
+    sum_headers = headers[2:]
+    unique_departments = sorted({row['Department'] for row in data})
+    for department in unique_departments:
+        compiled_txt+=f'Department:\t\t\t{department}\n'
+        total_hours=0
+        top_hours=0
+        top_name=''
+        counter=0
+        
+        for row in data: 
+            if row['Department'] == department:
+                employee_total_hours=0
+                for header in sum_headers:
+                    temp_total = safe_cast(row[header], float, 0)
+                    total_hours += temp_total
+                    employee_total_hours += temp_total
+                if employee_total_hours > top_hours:
+                    top_hours = employee_total_hours
+                    top_name = row['EmployeeName']
+                counter+=1
+
+        avg_hours = (total_hours / counter) if total_hours else 0  
+        compiled_txt+=f'Total Hours Worked by Department:\t{total_hours}\n'
+        compiled_txt+=f'Average Hours Worked by Employees:\t{avg_hours}\n'
+        compiled_txt+=f'Employee with Most Hours Worked:\t{top_name} with {top_hours} hours\n'
+    timer2.stop()
+    return compiled_txt
+
+def compile_the_data_optimized(headers, data):
+    print('Optimized version')
+    timer3 = Timer(3)
+    timer3.start()
+    compiled_txt = ''
+    department_info = {}
+    sum_headers = headers[2:]  # Do this once to avoid repetition
+
+    # Single iteration to collect data
+    for row in data:
+        department = row['Department']
+        if department not in department_info:
+            department_info[department] = {'total_hours': 0, 'employee_hours': [], 'counter': 0}
+
+        employee_total_hours = sum(safe_cast(row[header], float, 0) for header in sum_headers)
+        department_info[department]['total_hours']+=employee_total_hours
+        department_info[department]['employee_hours'].append((row['EmployeeName'], employee_total_hours))
+        department_info[department]['counter']+=1
+
+    # Process collected data
+    for department in sorted(department_info):
+        info = department_info[department]
+        top_name, top_hours = max(info['employee_hours'], key=lambda x: x[1], default=("N/A", 0))
+        avg_hours = info['total_hours'] / info['counter'] if info['counter'] else 0
+
+        compiled_txt += f'Department:\t\t\t{department}\n'
+        compiled_txt += f'Total Hours Worked by Department:\t{info['total_hours']}\n'
+        compiled_txt += f'Average Hours Worked by Employees:\t{avg_hours}\n'
+        compiled_txt += f'Employee with Most Hours Worked:\t{top_name} with {top_hours} hours\n'
+    timer3.stop()
+    return compiled_txt
+    
+def to_int_days(headers,data):
+    day_to_int = {day: index for index, day in enumerate(headers, start=3)}
+    converted_data = []
+    for row in data:
+        converted_row = {key: (day_to_int[value] if key in day_to_int else value) for key, value in row.items()}
+        converted_data.append(converted_row)
+    return converted_data
+
+def display(headers,data):
+    print(headers)
+    for row in data:
+        print(row)
+            
+def read_file(file_path):
+    data = []
+    headers = []
+    try:
+        with open(file_path, 'r', encoding='utf-8-sig') as file:
+            content = file.read()  # Read the entire file content at once
+            lines = content.strip().split('\n')  # Split content into lines
+            headers = lines[0].split(',')  # Extract headers
+            for line in lines[1:]:
+                values = line.split(',')
+                row_dict = dict(zip(headers, values))
+                data.append(row_dict)
+    except Exception as e:
+        print(f"Error in reading the file: {e}")
+    return headers, data
+
+def write_csv_file(output_csv_file_path, headers, data):
+    try:
+        compiled_string = ','.join(headers) + '\n'
+        for row_dict in data:
+            row_values = [str(row_dict.get(header, "")) for header in headers]  # Get values in header order, safely handling missing keys
+            compiled_string += ','.join(row_values) + '\n'
+        with open(output_csv_file_path, 'w') as file:
+            file.write(compiled_string)
+    except Exception as e:
+        print(f"Error in writing the file: {e}")
+ 
 def Day5():
     # Create an application for ABC company, database ABC_Company and a table Employee 
     # Name, Address, Email, Salary, Department

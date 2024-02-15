@@ -1,3 +1,4 @@
+import time
 def extract_keys(products):
     result = {}
     used_keys = {}
@@ -80,3 +81,66 @@ class BCOLORS:
     ENDC = '\033[0m'
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
+
+
+class Timer:
+    def __init__(self, identifier=None):
+        self.identifier = identifier
+        self.start_time = None
+        self.pause_time = None
+        self.elapsed_time_during_pauses = 0
+
+    def start(self):
+        if self.start_time is not None:
+            print(f"Timer {self._display_id()} is already running. Use .stop() to stop it or .reset() to reset it.")
+            return
+        self.start_time = time.perf_counter()
+        print(f"Timer {self._display_id()} started.")
+
+    def pause(self):
+        if self.start_time is None:
+            print(f"Timer {self._display_id()} has not been started.")
+            return
+        if self.pause_time is not None:
+            print(f"Timer {self._display_id()} is already paused.")
+            return
+        self.pause_time = time.perf_counter()
+        print(f"Timer {self._display_id()} paused.")
+
+    def resume(self):
+        if self.start_time is None:
+            print(f"Timer {self._display_id()} has not been started.")
+            return
+        if self.pause_time is None:
+            print(f"Timer {self._display_id()} is not paused.")
+            return
+        self.elapsed_time_during_pauses += time.perf_counter() - self.pause_time
+        self.pause_time = None
+        print(f"Timer {self._display_id()} resumed.")
+
+    def stop(self):
+        if self.start_time is None:
+            print(f"Timer {self._display_id()} has not been started.")
+            return
+        if self.pause_time is not None:
+            self.resume()  # Resume to get accurate elapsed time before stopping
+        end_time = time.perf_counter()
+        elapsed_time = end_time - self.start_time - self.elapsed_time_during_pauses
+        print(f"Timer {self._display_id()} stopped. Elapsed time: {elapsed_time:.4f} seconds.")
+        self.reset()
+
+    def reset(self):
+        self.start_time = None
+        self.pause_time = None
+        self.elapsed_time_during_pauses = 0
+
+    def _display_id(self):
+        return f'#{self.identifier}' if self.identifier is not None else '(no id)'
+
+    @staticmethod
+    def time_function(func, *args, **kwargs):
+        start_time = time.perf_counter()
+        result = func(*args, **kwargs)
+        end_time = time.perf_counter()
+        print(f"Function '{func.__name__}' executed in: {end_time - start_time:.4f} seconds")
+        return result
