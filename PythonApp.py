@@ -1,17 +1,15 @@
 
 import random 
 import pygame as pg
-import ExternalFuncs #import my own library
+import sqlite3
+#import pyodbc
+#import mysql connector
+import contextlib
 from ExternalFuncs import ask_in_range
 from ExternalFuncs import ask_a_question
 from ExternalFuncs import style
-from ExternalFuncs import extract_keys
-from ExternalFuncs import extract_keys_with_numbers
+from ExternalFuncs import safe_cast
 from ExternalFuncs import Timer
-
-import pyodbc
-#import mysql connector
-import contextlib
 
 def main():
     timer = Timer(1)
@@ -20,9 +18,247 @@ def main():
     #Day3()
     #Day4()
     #Day5()
-    Day6()
+    #Day6()
+    Day7()
     timer.stop()
-   
+
+def Day7(): #Mock Assignment task SQL Lite
+    # Tasks
+        # 1.0 Requirements
+            # • Details of Tours should be held in a CSV file or other non-volatile format
+            # • The user should be able to add new Tours, Guides and Walks Completed
+            # • The user should be able to Delete / Update Guide information.
+            # • Calculates pay earned by each guide and total income
+        # 2.0 Design
+            # • What classification from the Tour Company would be helpful?
+            # • What assumptions did you make?
+            # • Explain your program design approach (must be procedural)
+        # 3.0 Execute
+            # Record ten completed walks and then calculate and display the following:
+            # • Based on the completed walks, calculate and display the Basic Pay, Bonus Pay and Total Pay earned by each Guide.
+            # • The overall Profit / Loss made by the company for these completed walks
+        # 4.0 Test & Review
+            # • Outline and justify a strategy to test this application.
+            # • Discuss the shortcoming / potential improvements for the application.
+    
+    db_name='mockdb.db'
+    create_tables(db_name)
+    populate_tables(db_name)
+    
+    # table_names=['tours','guides','completed_walks']    
+    new_tour={
+        "destination":'Home Run',
+        "duration":12,
+        "price_pp":50.00,
+        "min_walkers":12,
+        "max_walkers":12,
+    }
+    insert_tour(db_name,new_tour)
+    tour_data={
+        "destination":'Home Run',
+        "duration":6,
+        "price_pp":26.00,
+        "min_walkers":6,
+        "max_walkers":16,
+    }
+    update_tour(db_name,tour_data)
+    del_tour_name='Home Run'
+    delete_tour(db_name,del_tour_name)
+    starts_per_each_guide=each_guide_calc(db_name) # Calculate and Display pay earned by each guide and total income
+    display_stats(starts_per_each_guide)
+    tour_profit_loss=calculate_tour_profit_loss(db_name)
+    display_tour_profit_loss(tour_profit_loss)
+
+    #print(pay_for_each_guide(db_name)) # 1. Display pay for each guide
+    #print(overall_profit_loss(db_name)) # 2. Display overall profit/loss
+    
+    def create_tables(db_name,drop=True):  # Create new tables 
+        con = sqlite3.connect(db_name)
+        cur = con.cursor()
+        if drop: # Drop existing tables
+            cur.executescript("""
+                DROP TABLE IF EXISTS tours;
+                DROP TABLE IF EXISTS guides;
+                DROP TABLE IF EXISTS completed_walks;
+            """)
+        # Create new tables
+        cur.executescript("""
+            CREATE TABLE tours(
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                destination TEXT NOT NULL,
+                duration INT,
+                price_pp REAL,
+                min_walkers INT,
+                max_walkers INT
+            );
+            CREATE TABLE guides(
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                basic_rate REAL,
+                rate_pp INT
+            );
+            CREATE TABLE completed_walks(
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                tour_id INTEGER,
+                guide_id INTEGER,
+                walkers INT,
+                FOREIGN KEY(tour_id) REFERENCES tours(id),
+                FOREIGN KEY(guide_id) REFERENCES guides(id)
+            );
+        """)
+        con.commit()
+        con.close()
+        
+    def populate_tables(db_name): #Generate Data for the tables
+        con = sqlite3.connect(db_name)
+        cur = con.cursor()
+        #Generate Data for the tours table
+        cur.executescript(
+        """
+            INSERT INTO tours (destination, duration, price_pp, min_walkers, max_walkers) VALUES
+            ('Sugarloaf Mountain', 3, 10.00, 5, 12),
+            ('Grand Canyon', 5, 15.00, 4, 15),
+            ('Great Wall of China', 2, 8.00, 6, 10),
+            ('Machu Picchu', 4, 20.00, 5, 15),
+            ('Eiffel Tower', 1, 12.00, 2, 5),
+            ('Colosseum', 2, 9.00, 4, 8),
+            ('Pyramids of Giza', 6, 25.00, 5, 20),
+            ('Serengeti Safari', 7, 30.00, 6, 12),
+            ('Taj Mahal', 2, 11.00, 3, 7),
+            ('Great Barrier Reef', 4, 22.00, 4, 9);
+        """
+        )
+        #Generate Data for the guides table
+        cur.executescript(
+        """
+            INSERT INTO guides (name, basic_rate, rate_pp) VALUES
+            ('Barbara', 12.50, 1.25),
+            ('Eddie', 15.00, 2.00),
+            ('Jessica', 10.00, 0.75),
+            ('Michael', 18.00, 2.50),
+            ('Sophia', 14.00, 1.50),
+            ('Liam', 16.00, 2.25),
+            ('Emma', 13.00, 1.00),
+            ('Oliver', 17.50, 2.75),
+            ('Isabella', 11.50, 1.25),
+            ('James', 19.00, 3.00);
+        """
+        )
+        #Generate Data for the completed_walks table
+        cur.executescript(
+        """
+            INSERT INTO completed_walks (guide_id, tour_id, walkers) VALUES
+            (1, 1, 10),
+            (2, 2, 8),
+            (3, 3, 12),
+            (4, 4, 7),
+            (5, 5, 5),
+            (1, 6, 9),
+            (2, 7, 15),
+            (3, 8, 11),
+            (4, 9, 6),
+            (5, 10, 8);
+        """
+        )
+        con.commit()
+        con.close()
+        
+    def insert_tour(db_name,new_tour): #Insert a tour from dictionary
+        con = sqlite3.connect(db_name)
+        cur = con.cursor()
+        query = """
+            INSERT INTO tours (destination, duration, price_pp, min_walkers, max_walkers) 
+            VALUES (?, ?, ?, ?, ?);
+        """
+        cur.execute(query, (new_tour["destination"], new_tour["duration"], new_tour["price_pp"], new_tour["min_walkers"], new_tour["max_walkers"]))
+        con.commit()
+        con.close()
+        
+    def update_tour(db_name,tour_data): #Updating my signature tour
+        con = sqlite3.connect(db_name)
+        cur = con.cursor()
+        update_sql = "UPDATE tours SET " # Base SQL UPDATE statement
+        params = [] # Initialize a list to hold the SQL parameter values
+        
+        # Dynamically build the SET part of the SQL statement based on the tour_data dictionary
+        set_clauses = []
+        for key, value in tour_data.items():
+            if key != 'destination':  # Exclude the destination key from the SET clause
+                set_clauses.append(f"{key} = ?")
+                params.append(value)
+        update_sql += ", ".join(set_clauses) # Join the set clauses with commas and add to the base SQL statement
+        update_sql += " WHERE destination = ?;"
+        params.append(tour_data['destination']) # Add the destination value to the end of the params list
+        cur.execute(update_sql, params) # Execute the dynamically constructed SQL statement
+        con.commit()
+        con.close()
+
+    def delete_tour(db_name,del_tour_name): #Sad moment, deleting my signature tour 
+        con = sqlite3.connect(db_name)
+        cur = con.cursor()
+        query=(
+        """
+            DELETE FROM tours
+            WHERE destination = ?;
+        """
+        )
+        cur.execute(query, (del_tour_name,)) 
+        con.commit()
+        con.close()
+
+    def each_guide_calc(db_name): # Calculates pay earned by each guide and total income
+        con = sqlite3.connect(db_name)
+        cur = con.cursor()
+        res=cur.execute(
+        """
+            SELECT G.id, G.name,
+                SUM(G.basic_rate + (C.walkers * G.rate_pp)) AS total_pay,
+                SUM(C.walkers * T.price_pp) AS total_income
+            FROM guides G
+            JOIN completed_walks C ON G.id = C.guide_id
+            JOIN tours T ON C.tour_id = T.id
+            GROUP BY G.id, G.name;
+        """
+        )
+        query_results = res.fetchall()
+        cur.close()
+        return query_results
+
+    def calculate_tour_profit_loss(db_name):
+        con = sqlite3.connect(db_name)
+        cur = con.cursor()
+        query = """
+            SELECT T.id, T.destination,
+                SUM(C.walkers * T.price_pp) AS total_income,
+                SUM(G.basic_rate + (C.walkers * G.rate_pp)) AS total_pay,
+                (SUM(C.walkers * T.price_pp) - SUM(G.basic_rate + (C.walkers * G.rate_pp))) AS profit_loss
+            FROM tours T
+            JOIN completed_walks C ON T.id = C.tour_id
+            JOIN guides G ON C.guide_id = G.id
+            GROUP BY T.id, T.destination;
+        """
+        res = cur.execute(query)
+        query_results = res.fetchall()
+        cur.close()
+        return query_results
+
+    def display_stats(query_results):
+        header = f"{'Guide ID':<10} {'Guide Name':<20} {'Total Pay':<15} {'Total Income':<15}"
+        print(header)
+        print('-' * len(header))  # Separator
+        for guide_id, guide_name, total_pay, total_income in query_results:
+            print(f"{guide_id:<10} {guide_name:<20} {total_pay:<15.2f} {total_income:<15.2f}")
+        print("\n")
+            
+    def display_tour_profit_loss(query_results):
+        header = f"{'Tour ID':<10} {'Tour Name':<25} {'Total Income':<15} {'Total Pay':<15} {'Profit/Loss':<15}"     # Header for the display
+        print(header)
+        print('-' * len(header))  # Separator
+        # Iterate over the query results and print each row in a formatted manner
+        for tour_id, tour_name, total_income, total_pay, profit_loss in query_results:
+            print(f"{tour_id:<10} {tour_name:<25} {total_income:<15.2f} {total_pay:<15.2f} {profit_loss:<15.2f}")
+        print("\n")
+
 def Day6():
     # Assessment Scenario: Given a CSV File containing employee names, departments and daily hours worked for a week, create a programme which calculates the 
     # total workforce effort for the week by department
@@ -61,111 +297,111 @@ def Day6():
     print(compiled_txt)
     #write_csv_file(output_csv_fpath,headers,data)
 
-def compile_the_data(headers,data):
-    print('Not Optimized version')
-    timer2 = Timer(2)
-    timer2.start()
-    compiled_txt=''
-    sum_headers = headers[2:]
-    unique_departments = sorted({row['Department'] for row in data})
-    for department in unique_departments:
-        compiled_txt+=f'Department:\t\t\t{department}\n'
-        total_hours=0
-        top_hours=0
-        top_name=''
-        counter=0
-        
-        for row in data: 
-            if row['Department'] == department:
-                employee_total_hours=0
-                for header in sum_headers:
-                    temp_total = safe_cast(row[header], float, 0)
-                    total_hours += temp_total
-                    employee_total_hours += temp_total
-                if employee_total_hours > top_hours:
-                    top_hours = employee_total_hours
-                    top_name = row['EmployeeName']
-                counter+=1
-
-        avg_hours = (total_hours / counter) if total_hours else 0  
-        compiled_txt+=f'Total Hours Worked by Department:\t{total_hours}\n'
-        compiled_txt+=f'Average Hours Worked by Employees:\t{avg_hours}\n'
-        compiled_txt+=f'Employee with Most Hours Worked:\t{top_name} with {top_hours} hours\n'
-    timer2.stop()
-    return compiled_txt
-
-def compile_the_data_optimized(headers, data):
-    print('Optimized version')
-    timer3 = Timer(3)
-    timer3.start()
-    compiled_txt = ''
-    department_info = {}
-    sum_headers = headers[2:]  # Do this once to avoid repetition
-
-    # Single iteration to collect data
-    for row in data:
-        department = row['Department']
-        if department not in department_info:
-            department_info[department] = {'total_hours': 0, 'employee_hours': [], 'counter': 0}
-
-        employee_total_hours = sum(safe_cast(row[header], float, 0) for header in sum_headers)
-        department_info[department]['total_hours']+=employee_total_hours
-        department_info[department]['employee_hours'].append((row['EmployeeName'], employee_total_hours))
-        department_info[department]['counter']+=1
-
-    # Process collected data
-    for department in sorted(department_info):
-        info = department_info[department]
-        top_name, top_hours = max(info['employee_hours'], key=lambda x: x[1], default=("N/A", 0))
-        avg_hours = info['total_hours'] / info['counter'] if info['counter'] else 0
-
-        compiled_txt += f'Department:\t\t\t{department}\n'
-        compiled_txt += f'Total Hours Worked by Department:\t{info['total_hours']}\n'
-        compiled_txt += f'Average Hours Worked by Employees:\t{avg_hours}\n'
-        compiled_txt += f'Employee with Most Hours Worked:\t{top_name} with {top_hours} hours\n'
-    timer3.stop()
-    return compiled_txt
-    
-def to_int_days(headers,data):
-    day_to_int = {day: index for index, day in enumerate(headers, start=3)}
-    converted_data = []
-    for row in data:
-        converted_row = {key: (day_to_int[value] if key in day_to_int else value) for key, value in row.items()}
-        converted_data.append(converted_row)
-    return converted_data
-
-def display(headers,data):
-    print(headers)
-    for row in data:
-        print(row)
+    def compile_the_data(headers,data):
+        print('Not Optimized version')
+        timer2 = Timer(2)
+        timer2.start()
+        compiled_txt=''
+        sum_headers = headers[2:]
+        unique_departments = sorted({row['Department'] for row in data})
+        for department in unique_departments:
+            compiled_txt+=f'Department:\t\t\t{department}\n'
+            total_hours=0
+            top_hours=0
+            top_name=''
+            counter=0
             
-def read_file(file_path):
-    data = []
-    headers = []
-    try:
-        with open(file_path, 'r', encoding='utf-8-sig') as file:
-            content = file.read()  # Read the entire file content at once
-            lines = content.strip().split('\n')  # Split content into lines
-            headers = lines[0].split(',')  # Extract headers
-            for line in lines[1:]:
-                values = line.split(',')
-                row_dict = dict(zip(headers, values))
-                data.append(row_dict)
-    except Exception as e:
-        print(f"Error in reading the file: {e}")
-    return headers, data
+            for row in data: 
+                if row['Department'] == department:
+                    employee_total_hours=0
+                    for header in sum_headers:
+                        temp_total = safe_cast(row[header], float, 0)
+                        total_hours += temp_total
+                        employee_total_hours += temp_total
+                    if employee_total_hours > top_hours:
+                        top_hours = employee_total_hours
+                        top_name = row['EmployeeName']
+                    counter+=1
 
-def write_csv_file(output_csv_file_path, headers, data):
-    try:
-        compiled_string = ','.join(headers) + '\n'
-        for row_dict in data:
-            row_values = [str(row_dict.get(header, "")) for header in headers]  # Get values in header order, safely handling missing keys
-            compiled_string += ','.join(row_values) + '\n'
-        with open(output_csv_file_path, 'w') as file:
-            file.write(compiled_string)
-    except Exception as e:
-        print(f"Error in writing the file: {e}")
- 
+            avg_hours = (total_hours / counter) if total_hours else 0  
+            compiled_txt+=f'Total Hours Worked by Department:\t{total_hours}\n'
+            compiled_txt+=f'Average Hours Worked by Employees:\t{avg_hours}\n'
+            compiled_txt+=f'Employee with Most Hours Worked:\t{top_name} with {top_hours} hours\n'
+        timer2.stop()
+        return compiled_txt
+
+    def compile_the_data_optimized(headers, data):
+        print('Optimized version')
+        timer3 = Timer(3)
+        timer3.start()
+        compiled_txt = ''
+        department_info = {}
+        sum_headers = headers[2:]  # Do this once to avoid repetition
+
+        # Single iteration to collect data
+        for row in data:
+            department = row['Department']
+            if department not in department_info:
+                department_info[department] = {'total_hours': 0, 'employee_hours': [], 'counter': 0}
+
+            employee_total_hours = sum(safe_cast(row[header], float, 0) for header in sum_headers)
+            department_info[department]['total_hours']+=employee_total_hours
+            department_info[department]['employee_hours'].append((row['EmployeeName'], employee_total_hours))
+            department_info[department]['counter']+=1
+
+        # Process collected data
+        for department in sorted(department_info):
+            info = department_info[department]
+            top_name, top_hours = max(info['employee_hours'], key=lambda x: x[1], default=("N/A", 0))
+            avg_hours = info['total_hours'] / info['counter'] if info['counter'] else 0
+
+            compiled_txt += f'Department:\t\t\t{department}\n'
+            compiled_txt += f'Total Hours Worked by Department:\t{info['total_hours']}\n'
+            compiled_txt += f'Average Hours Worked by Employees:\t{avg_hours}\n'
+            compiled_txt += f'Employee with Most Hours Worked:\t{top_name} with {top_hours} hours\n'
+        timer3.stop()
+        return compiled_txt
+        
+    def to_int_days(headers,data):
+        day_to_int = {day: index for index, day in enumerate(headers, start=3)}
+        converted_data = []
+        for row in data:
+            converted_row = {key: (day_to_int[value] if key in day_to_int else value) for key, value in row.items()}
+            converted_data.append(converted_row)
+        return converted_data
+
+    def display(headers,data):
+        print(headers)
+        for row in data:
+            print(row)
+                
+    def read_file(file_path):
+        data = []
+        headers = []
+        try:
+            with open(file_path, 'r', encoding='utf-8-sig') as file:
+                content = file.read()  # Read the entire file content at once
+                lines = content.strip().split('\n')  # Split content into lines
+                headers = lines[0].split(',')  # Extract headers
+                for line in lines[1:]:
+                    values = line.split(',')
+                    row_dict = dict(zip(headers, values))
+                    data.append(row_dict)
+        except Exception as e:
+            print(f"Error in reading the file: {e}")
+        return headers, data
+
+    def write_csv_file(output_csv_file_path, headers, data):
+        try:
+            compiled_string = ','.join(headers) + '\n'
+            for row_dict in data:
+                row_values = [str(row_dict.get(header, "")) for header in headers]  # Get values in header order, safely handling missing keys
+                compiled_string += ','.join(row_values) + '\n'
+            with open(output_csv_file_path, 'w') as file:
+                file.write(compiled_string)
+        except Exception as e:
+            print(f"Error in writing the file: {e}")
+
 def Day5():
     # Create an application for ABC company, database ABC_Company and a table Employee 
     # Name, Address, Email, Salary, Department
@@ -188,7 +424,7 @@ def Day5():
     @contextlib.contextmanager
     def use_connection():
         try:
-            connection = pyodbc.connect(connection_string)
+            # connection = pyodbc.connect(connection_string)
             yield connection
         except Exception as e:
             print(f"Error connecting to LocalDB: {e}")
@@ -558,370 +794,367 @@ def Day3():
     Task9_Banking()
 
 def Day2():
-    #RugbyScore()
-    #CardGame()
-    #CardGame2()
-    #Task3()
+
     #SnakeGame()
     snake_for_two_players()
     
-def snake_game(): # One Player Snake
-    tile_size = 25
-    window_width = 800
-    window_height = 600
-    x_range = (tile_size // 2, window_width - tile_size // 2)
-    y_range = (tile_size // 2, window_height - tile_size // 2)
-    def get_random_position():
-        x_position = random.randrange(x_range[0], x_range[1], tile_size)
-        y_position = random.randrange(y_range[0], y_range[1], tile_size)
-        return [x_position, y_position]
-    snake = pg.rect.Rect([0,0,tile_size-2,tile_size-2])
-    snake.center=get_random_position()
-    length = 1
-    snake_dir=(0,0)
-    time,time_step=0,110
-    segments = [snake.copy()]
-    food=snake.copy()
-    food.center=get_random_position()
-    pg.init()
-    screen = pg.display.set_mode((window_width,window_height))
-    clock = pg.time.Clock()
-    running = True
-    prev_cords_print=None
-    dirs={pg.K_w:1,pg.K_s:1,pg.K_a:1,pg.K_d:1}
+    def snake_game(): # One Player Snake
+        tile_size = 25
+        window_width = 800
+        window_height = 600
+        x_range = (tile_size // 2, window_width - tile_size // 2)
+        y_range = (tile_size // 2, window_height - tile_size // 2)
+        def get_random_position():
+            x_position = random.randrange(x_range[0], x_range[1], tile_size)
+            y_position = random.randrange(y_range[0], y_range[1], tile_size)
+            return [x_position, y_position]
+        snake = pg.rect.Rect([0,0,tile_size-2,tile_size-2])
+        snake.center=get_random_position()
+        length = 1
+        snake_dir=(0,0)
+        time,time_step=0,110
+        segments = [snake.copy()]
+        food=snake.copy()
+        food.center=get_random_position()
+        pg.init()
+        screen = pg.display.set_mode((window_width,window_height))
+        clock = pg.time.Clock()
+        running = True
+        prev_cords_print=None
+        dirs={pg.K_w:1,pg.K_s:1,pg.K_a:1,pg.K_d:1}
 
-    while running:
-        for event in pg.event.get():
-            if event.type == pg.QUIT:
-                running = False
-            if event.type==pg.KEYDOWN:
-                if event.key==pg.K_w and dirs[pg.K_w]:
-                    snake_dir=(0,-tile_size)
-                    dirs={pg.K_w:1,pg.K_s:0,pg.K_a:1,pg.K_d:1}
-                if event.key==pg.K_s and dirs[pg.K_s]:
-                    snake_dir=(0,tile_size)
-                    dirs={pg.K_w:0,pg.K_s:1,pg.K_a:1,pg.K_d:1}
-                if event.key==pg.K_a and dirs[pg.K_a]:
-                    snake_dir=(-tile_size,0)
-                    dirs={pg.K_w:1,pg.K_s:1,pg.K_a:1,pg.K_d:0}
-                if event.key==pg.K_d and dirs[pg.K_d]:
-                    snake_dir=(tile_size,0)
-                    dirs={pg.K_w:1,pg.K_s:1,pg.K_a:0,pg.K_d:1}
-                    
-        screen.fill('black')
-        # selfcollision
-        self_eating = pg.Rect.collidelist(snake,segments[:-1])!=-1
-        # border checking and restart the game if hit -> changed the restart only on selfcollision
-        if self_eating:
-            snake.center, food.center = get_random_position(),get_random_position()
-            length,snake_dir=1,(0,0)
-            segments = [snake.copy()]
-        # eat food
-        if snake.colliderect(food):
-            food.center = get_random_position()  # Ensure this is aligned with the grid
-            length += 1
-        pg.draw.rect(screen,'red',food) #draw food
-        [pg.draw.rect(screen,'green',segment) for segment in segments] #draw snake
-        time_now=pg.time.get_ticks()
-        # Action Tick
-        if time_now-time>time_step:
-            time=time_now
-            snake.move_ip(snake_dir)
-            # Wrapping logic
-            if snake.left < 0:
-                snake.right = window_width
-            elif snake.right > window_width:
-                snake.left = 0
-            if snake.top < 0:
-                snake.bottom = window_height
-            elif snake.bottom > window_height:
-                snake.top = 0
-            # After updating the snake's position, add the new position to segments
-            segments.append(snake.copy())
-            segments = segments[-length:]
-            # Print coords of the snake and , if they were changed
-            cords=f"Snake: {snake.center} Food: {food.center}"
-            if (prev_cords_print!=cords):
-                print(cords)
-                prev_cords_print=cords
+        while running:
+            for event in pg.event.get():
+                if event.type == pg.QUIT:
+                    running = False
+                if event.type==pg.KEYDOWN:
+                    if event.key==pg.K_w and dirs[pg.K_w]:
+                        snake_dir=(0,-tile_size)
+                        dirs={pg.K_w:1,pg.K_s:0,pg.K_a:1,pg.K_d:1}
+                    if event.key==pg.K_s and dirs[pg.K_s]:
+                        snake_dir=(0,tile_size)
+                        dirs={pg.K_w:0,pg.K_s:1,pg.K_a:1,pg.K_d:1}
+                    if event.key==pg.K_a and dirs[pg.K_a]:
+                        snake_dir=(-tile_size,0)
+                        dirs={pg.K_w:1,pg.K_s:1,pg.K_a:1,pg.K_d:0}
+                    if event.key==pg.K_d and dirs[pg.K_d]:
+                        snake_dir=(tile_size,0)
+                        dirs={pg.K_w:1,pg.K_s:1,pg.K_a:0,pg.K_d:1}
+                        
+            screen.fill('black')
+            # selfcollision
+            self_eating = pg.Rect.collidelist(snake,segments[:-1])!=-1
+            # border checking and restart the game if hit -> changed the restart only on selfcollision
+            if self_eating:
+                snake.center, food.center = get_random_position(),get_random_position()
+                length,snake_dir=1,(0,0)
+                segments = [snake.copy()]
+            # eat food
+            if snake.colliderect(food):
+                food.center = get_random_position()  # Ensure this is aligned with the grid
+                length += 1
+            pg.draw.rect(screen,'red',food) #draw food
+            [pg.draw.rect(screen,'green',segment) for segment in segments] #draw snake
+            time_now=pg.time.get_ticks()
+            # Action Tick
+            if time_now-time>time_step:
+                time=time_now
+                snake.move_ip(snake_dir)
+                # Wrapping logic
+                if snake.left < 0:
+                    snake.right = window_width
+                elif snake.right > window_width:
+                    snake.left = 0
+                if snake.top < 0:
+                    snake.bottom = window_height
+                elif snake.bottom > window_height:
+                    snake.top = 0
+                # After updating the snake's position, add the new position to segments
+                segments.append(snake.copy())
+                segments = segments[-length:]
+                # Print coords of the snake and , if they were changed
+                cords=f"Snake: {snake.center} Food: {food.center}"
+                if (prev_cords_print!=cords):
+                    print(cords)
+                    prev_cords_print=cords
+            
+            pg.display.flip()
+            clock.tick(60) # Consistent 60 fps
+
+    def snake_for_two_players():
+        tile_size = 25
+        window_width = 800
+        window_height = 600
+        x_range = (tile_size // 2, window_width - tile_size // 2)
+        y_range = (tile_size // 2, window_height - tile_size // 2)
+
+        def get_random_position():
+            x_position = random.randrange(x_range[0], x_range[1], tile_size)
+            y_position = random.randrange(y_range[0], y_range[1], tile_size)
+            return [x_position, y_position]
+
+        # Initialize the first snake
+        snake = pg.Rect([0, 0, tile_size - 2, tile_size - 2])
+        snake.center = get_random_position()
+        length = 1
+        snake_dir = (0, 0)
+        segments = [snake.copy()]
+
+        # Initialize the second snake
+        snake2 = pg.Rect([0, 0, tile_size - 2, tile_size - 2])
+        snake2.center = get_random_position()
+        length2 = 1
+        snake_dir2 = (0, 0)
+        segments2 = [snake2.copy()]
+
+        # Initial settings
+        food = snake.copy()
+        food.center = get_random_position()
+        pg.init()
+        screen = pg.display.set_mode((window_width, window_height))
+        font = pg.font.SysFont('Arial', 24)  # Choose a font and size
+        clock = pg.time.Clock()
+        running = True
+        time_step = 110  # in milliseconds
+        last_move_time = pg.time.get_ticks()  # Initialize the last move time
+        prev_cords_print=None
+        dirs = {pg.K_w: 1, pg.K_s: 1, pg.K_a: 1, pg.K_d: 1}
+        dirs2 = {pg.K_UP: 1, pg.K_DOWN: 1, pg.K_LEFT: 1, pg.K_RIGHT: 1}
         
-        pg.display.flip()
-        clock.tick(60) # Consistent 60 fps
 
-def snake_for_two_players():
-    tile_size = 25
-    window_width = 800
-    window_height = 600
-    x_range = (tile_size // 2, window_width - tile_size // 2)
-    y_range = (tile_size // 2, window_height - tile_size // 2)
+        while running:
+            for event in pg.event.get():
+                if event.type == pg.QUIT:
+                    running = False
+                if event.type == pg.KEYDOWN:
+                    # Controls for the snake 1
+                    if event.key == pg.K_w and dirs[pg.K_w]:
+                        snake_dir = (0, -tile_size)
+                        dirs = {pg.K_w: 1, pg.K_s: 0, pg.K_a: 1, pg.K_d: 1}
+                    if event.key == pg.K_s and dirs[pg.K_s]:
+                        snake_dir = (0, tile_size)
+                        dirs = {pg.K_w: 0, pg.K_s: 1, pg.K_a: 1, pg.K_d: 1}
+                    if event.key == pg.K_a and dirs[pg.K_a]:
+                        snake_dir = (-tile_size, 0)
+                        dirs = {pg.K_w: 1, pg.K_s: 1, pg.K_a: 1, pg.K_d: 0}
+                    if event.key == pg.K_d and dirs[pg.K_d]:
+                        snake_dir = (tile_size, 0)
+                        dirs = {pg.K_w: 1, pg.K_s: 1, pg.K_a: 0, pg.K_d: 1}
+                    # Controls for the snake 2
+                    if event.key == pg.K_UP and dirs2[pg.K_UP]:
+                        snake_dir2 = (0, -tile_size)
+                        dirs2 = {pg.K_UP: 1, pg.K_DOWN: 0, pg.K_LEFT: 1, pg.K_RIGHT: 1}
+                    if event.key == pg.K_DOWN and dirs2[pg.K_DOWN]:
+                        snake_dir2 = (0, tile_size)
+                        dirs2 = {pg.K_UP: 0, pg.K_DOWN: 1, pg.K_LEFT: 1, pg.K_RIGHT: 1}
+                    if event.key == pg.K_LEFT and dirs2[pg.K_LEFT]:
+                        snake_dir2 = (-tile_size, 0)
+                        dirs2 = {pg.K_UP: 1, pg.K_DOWN: 1, pg.K_LEFT: 1, pg.K_RIGHT: 0}
+                    if event.key == pg.K_RIGHT and dirs2[pg.K_RIGHT]:
+                        snake_dir2 = (tile_size, 0)
+                        dirs2 = {pg.K_UP: 1, pg.K_DOWN: 1, pg.K_LEFT: 0, pg.K_RIGHT: 1}
 
-    def get_random_position():
-        x_position = random.randrange(x_range[0], x_range[1], tile_size)
-        y_position = random.randrange(y_range[0], y_range[1], tile_size)
-        return [x_position, y_position]
+            screen.fill('black')
+            restart,collision_snake,collision_snake2 = False,False,False
+            # Collision and game logic for both snakes
+            self_eating = (pg.Rect.collidelist(snake, segments[:-1]) != -1 or pg.Rect.collidelist(snake2, segments2[:-1]) != -1 or snake.colliderect(snake2) or snake2.colliderect(snake))
+            if self_eating: restart=True
+            # Players collision
+            for segment in segments2[1:]:  # Skip the head of the second snake to prevent head-on collisions counting as a loss for both
+                if snake.colliderect(segment):
+                    restart, collision_snake2 = True, True  # If snake 1 hits snake 2, snake 2 wins
+            for segment in segments[1:]:  # Skip the head of the first snake for the same reason
+                if snake2.colliderect(segment):
+                    restart, collision_snake = True, True  # If snake 2 hits snake 1, snake 1 wins
+            message_to_display = None
+            if collision_snake and not collision_snake2:  # Only snake 1 wins
+                message_to_display = "Player Two (Blue) Wins!"
+            elif collision_snake2 and not collision_snake:  # Only snake 2 wins
+                message_to_display = "Player One (Green) Wins!"
+            elif collision_snake and collision_snake2:  # If both collide with each other simultaneously
+                message_to_display = "It's a Draw!"  # Or handle according to your game's rules
+            if message_to_display:
+                print(message_to_display)
+            if (restart):
+                snake.center, snake2.center, food.center = get_random_position(), get_random_position(), get_random_position()
+                length, length2 = 1, 1
+                snake_dir, snake_dir2 = (0, 0), (0, 0)
+                segments, segments2 = [snake.copy()], [snake2.copy()]
+            # Food eating logic for both snakes
+            if snake.colliderect(food):
+                food.center = get_random_position()
+                length += 1
+            if snake2.colliderect(food):
+                food.center = get_random_position()
+                length2 += 1
 
-    # Initialize the first snake
-    snake = pg.Rect([0, 0, tile_size - 2, tile_size - 2])
-    snake.center = get_random_position()
-    length = 1
-    snake_dir = (0, 0)
-    segments = [snake.copy()]
+            time_now = pg.time.get_ticks()
+            time_step = 110
+            # Action tick for the first snake
+            if time_now - last_move_time > time_step:
+                last_move_time = time_now
+                snake.move_ip(snake_dir)
+                snake2.move_ip(snake_dir2)
+                # Wrapping logic for both snakes
+                for s in [snake, snake2]:
+                    if s.left < 0: s.right = window_width
+                    elif s.right > window_width: s.left = 0
+                    if s.top < 0: s.bottom = window_height
+                    elif s.bottom > window_height: s.top = 0
+                segments.append(snake.copy())
+                segments = segments[-length:]
+                segments2.append(snake2.copy())
+                segments2 = segments2[-length2:]
+                # Print coords of the snake and , if they were changed
+                cords=f"P1: {snake.center} P2:{snake2.center} F:{food.center}"
+                if (prev_cords_print!=cords):
+                    print(cords)
+                    prev_cords_print=cords
+                
+                
+            pg.draw.rect(screen, 'red', food)  # Draw food
+            [pg.draw.rect(screen, 'green', segment) for segment in segments]  # Draw first snake
+            [pg.draw.rect(screen, 'blue', segment) for segment in segments2]  # Draw second snake
 
-    # Initialize the second snake
-    snake2 = pg.Rect([0, 0, tile_size - 2, tile_size - 2])
-    snake2.center = get_random_position()
-    length2 = 1
-    snake_dir2 = (0, 0)
-    segments2 = [snake2.copy()]
+            pg.display.flip()
+            clock.tick(60)  # Consistent 60 fps
 
-    # Initial settings
-    food = snake.copy()
-    food.center = get_random_position()
-    pg.init()
-    screen = pg.display.set_mode((window_width, window_height))
-    font = pg.font.SysFont('Arial', 24)  # Choose a font and size
-    clock = pg.time.Clock()
-    running = True
-    time_step = 110  # in milliseconds
-    last_move_time = pg.time.get_ticks()  # Initialize the last move time
-    prev_cords_print=None
-    dirs = {pg.K_w: 1, pg.K_s: 1, pg.K_a: 1, pg.K_d: 1}
-    dirs2 = {pg.K_UP: 1, pg.K_DOWN: 1, pg.K_LEFT: 1, pg.K_RIGHT: 1}
+def Day1():
+    #RugbyScore()
+    #CardGame()
+    #CardGame2()
+    Task3()
     
-
-    while running:
-        for event in pg.event.get():
-            if event.type == pg.QUIT:
-                running = False
-            if event.type == pg.KEYDOWN:
-                # Controls for the snake 1
-                if event.key == pg.K_w and dirs[pg.K_w]:
-                    snake_dir = (0, -tile_size)
-                    dirs = {pg.K_w: 1, pg.K_s: 0, pg.K_a: 1, pg.K_d: 1}
-                if event.key == pg.K_s and dirs[pg.K_s]:
-                    snake_dir = (0, tile_size)
-                    dirs = {pg.K_w: 0, pg.K_s: 1, pg.K_a: 1, pg.K_d: 1}
-                if event.key == pg.K_a and dirs[pg.K_a]:
-                    snake_dir = (-tile_size, 0)
-                    dirs = {pg.K_w: 1, pg.K_s: 1, pg.K_a: 1, pg.K_d: 0}
-                if event.key == pg.K_d and dirs[pg.K_d]:
-                    snake_dir = (tile_size, 0)
-                    dirs = {pg.K_w: 1, pg.K_s: 1, pg.K_a: 0, pg.K_d: 1}
-                # Controls for the snake 2
-                if event.key == pg.K_UP and dirs2[pg.K_UP]:
-                    snake_dir2 = (0, -tile_size)
-                    dirs2 = {pg.K_UP: 1, pg.K_DOWN: 0, pg.K_LEFT: 1, pg.K_RIGHT: 1}
-                if event.key == pg.K_DOWN and dirs2[pg.K_DOWN]:
-                    snake_dir2 = (0, tile_size)
-                    dirs2 = {pg.K_UP: 0, pg.K_DOWN: 1, pg.K_LEFT: 1, pg.K_RIGHT: 1}
-                if event.key == pg.K_LEFT and dirs2[pg.K_LEFT]:
-                    snake_dir2 = (-tile_size, 0)
-                    dirs2 = {pg.K_UP: 1, pg.K_DOWN: 1, pg.K_LEFT: 1, pg.K_RIGHT: 0}
-                if event.key == pg.K_RIGHT and dirs2[pg.K_RIGHT]:
-                    snake_dir2 = (tile_size, 0)
-                    dirs2 = {pg.K_UP: 1, pg.K_DOWN: 1, pg.K_LEFT: 0, pg.K_RIGHT: 1}
-
-        screen.fill('black')
-        restart,collision_snake,collision_snake2 = False,False,False
-        # Collision and game logic for both snakes
-        self_eating = (pg.Rect.collidelist(snake, segments[:-1]) != -1 or pg.Rect.collidelist(snake2, segments2[:-1]) != -1 or snake.colliderect(snake2) or snake2.colliderect(snake))
-        if self_eating: restart=True
-        # Players collision
-        for segment in segments2[1:]:  # Skip the head of the second snake to prevent head-on collisions counting as a loss for both
-            if snake.colliderect(segment):
-                restart, collision_snake2 = True, True  # If snake 1 hits snake 2, snake 2 wins
-        for segment in segments[1:]:  # Skip the head of the first snake for the same reason
-            if snake2.colliderect(segment):
-                restart, collision_snake = True, True  # If snake 2 hits snake 1, snake 1 wins
-        message_to_display = None
-        if collision_snake and not collision_snake2:  # Only snake 1 wins
-            message_to_display = "Player Two (Blue) Wins!"
-        elif collision_snake2 and not collision_snake:  # Only snake 2 wins
-            message_to_display = "Player One (Green) Wins!"
-        elif collision_snake and collision_snake2:  # If both collide with each other simultaneously
-            message_to_display = "It's a Draw!"  # Or handle according to your game's rules
-        if message_to_display:
-            print(message_to_display)
-        if (restart):
-            snake.center, snake2.center, food.center = get_random_position(), get_random_position(), get_random_position()
-            length, length2 = 1, 1
-            snake_dir, snake_dir2 = (0, 0), (0, 0)
-            segments, segments2 = [snake.copy()], [snake2.copy()]
-        # Food eating logic for both snakes
-        if snake.colliderect(food):
-            food.center = get_random_position()
-            length += 1
-        if snake2.colliderect(food):
-            food.center = get_random_position()
-            length2 += 1
-
-        time_now = pg.time.get_ticks()
-        time_step = 110
-        # Action tick for the first snake
-        if time_now - last_move_time > time_step:
-            last_move_time = time_now
-            snake.move_ip(snake_dir)
-            snake2.move_ip(snake_dir2)
-            # Wrapping logic for both snakes
-            for s in [snake, snake2]:
-                if s.left < 0: s.right = window_width
-                elif s.right > window_width: s.left = 0
-                if s.top < 0: s.bottom = window_height
-                elif s.bottom > window_height: s.top = 0
-            segments.append(snake.copy())
-            segments = segments[-length:]
-            segments2.append(snake2.copy())
-            segments2 = segments2[-length2:]
-             # Print coords of the snake and , if they were changed
-            cords=f"P1: {snake.center} P2:{snake2.center} F:{food.center}"
-            if (prev_cords_print!=cords):
-                print(cords)
-                prev_cords_print=cords
-            
-            
-        pg.draw.rect(screen, 'red', food)  # Draw food
-        [pg.draw.rect(screen, 'green', segment) for segment in segments]  # Draw first snake
-        [pg.draw.rect(screen, 'blue', segment) for segment in segments2]  # Draw second snake
-
-        pg.display.flip()
-        clock.tick(60)  # Consistent 60 fps
+    def Task3(): #ListWork
+        my_list = [0,1,2,3,4,5,6,7,8,9]
+        print(f"Pure my_list is\n\t{my_list}")
+        print(f"\tmy_list[:]\n\t\t{my_list[:]}")
+        print(f"\tmy_list[2:6]\n\t\t{my_list[2:6]}")
+        print(f"\tmy_list[:4]\n\t\t{my_list[:4]}")
+        print(f"\tmy_list[5:]\n\t\t{my_list[5:]}")
+        print("negative list range")
+        print(f"\tmy_list[-3:]\n\t\t{my_list[-3:]}")
+        print(f"\tmy_list[-3:] Returns last 3\n\t\t{my_list[:-2]}")
+        print("stepping in my_list")
+        print(f"\tmy_list[::2]\n\t\t{my_list[::2]}")
+        print(f"\tmy_list[::-1]\n\t\t{my_list[::-1]}")
+        my_string="Hello Python"
+        print(f"reverse the string '{my_string}'")
+        print(f"\tmy_string[::-1]\n\t\t{my_string[::-1]}")
     
-def Task3(): #ListWork
-    my_list = [0,1,2,3,4,5,6,7,8,9]
-    print(f"Pure my_list is\n\t{my_list}")
-    print(f"\tmy_list[:]\n\t\t{my_list[:]}")
-    print(f"\tmy_list[2:6]\n\t\t{my_list[2:6]}")
-    print(f"\tmy_list[:4]\n\t\t{my_list[:4]}")
-    print(f"\tmy_list[5:]\n\t\t{my_list[5:]}")
-    print("negative list range")
-    print(f"\tmy_list[-3:]\n\t\t{my_list[-3:]}")
-    print(f"\tmy_list[-3:] Returns last 3\n\t\t{my_list[:-2]}")
-    print("stepping in my_list")
-    print(f"\tmy_list[::2]\n\t\t{my_list[::2]}")
-    print(f"\tmy_list[::-1]\n\t\t{my_list[::-1]}")
-    my_string="Hello Python"
-    print(f"reverse the string '{my_string}'")
-    print(f"\tmy_string[::-1]\n\t\t{my_string[::-1]}")
-   
-def card_game():
-    cards_not_used = [0]*52
-    minumum_cards = 10
-    while (len(cards_not_used)-minumum_cards):
-        higher_or_lower = ask_a_question("Do you think next card will be higher or lower?",{'H':'Higher','L':'Lower'})
-        unused_indexes = [index for index, value in enumerate(cards_not_used) if value == 0]
-        if unused_indexes>minumum_cards:
-            break
-        chosen_index = random.choice(unused_indexes)
-        cards_not_used[chosen_index] = 1
-
-        if higher_or_lower == "h":
-            print()
-
-def card_game_v2():
-    while True:
-        deck = generate_deck()
-        round_wins = 0
-        for _ in range(3):  # Three rounds
-            card1 = pick_unused_card(deck)
-            print(f"We drawn {card1['card']}")
-
+    def card_game():
+        cards_not_used = [0]*52
+        minumum_cards = 10
+        while (len(cards_not_used)-minumum_cards):
             higher_or_lower = ask_a_question("Do you think next card will be higher or lower?",{'H':'Higher','L':'Lower'})
-            card2 = pick_unused_card(deck)
+            unused_indexes = [index for index, value in enumerate(cards_not_used) if value == 0]
+            if unused_indexes>minumum_cards:
+                break
+            chosen_index = random.choice(unused_indexes)
+            cards_not_used[chosen_index] = 1
 
-            print(f"We drawn {card2['card']}")
-            guess_correct = (higher_or_lower == "h" and card1["rank"] < card2["rank"]) or (higher_or_lower == "l" and card1["rank"] > card2["rank"])
+            if higher_or_lower == "h":
+                print()
 
-            if guess_correct:
-                print("Correct guess!")
-                round_wins += 1
+    def card_game_v2():
+        while True:
+            deck = generate_deck()
+            round_wins = 0
+            for _ in range(3):  # Three rounds
+                card1 = pick_unused_card(deck)
+                print(f"We drawn {card1['card']}")
+
+                higher_or_lower = ask_a_question("Do you think next card will be higher or lower?",{'H':'Higher','L':'Lower'})
+                card2 = pick_unused_card(deck)
+
+                print(f"We drawn {card2['card']}")
+                guess_correct = (higher_or_lower == "h" and card1["rank"] < card2["rank"]) or (higher_or_lower == "l" and card1["rank"] > card2["rank"])
+
+                if guess_correct:
+                    print("Correct guess!")
+                    round_wins += 1
+                else:
+                    print("Wrong guess.")
+
+            if round_wins >= 2:
+                print("You won the round!")
             else:
-                print("Wrong guess.")
+                print("You lost the round.")
 
-        if round_wins >= 2:
-            print("You won the round!")
-        else:
-            print("You lost the round.")
+            play_again = ask_a_question("Do you want to play another round? (Y)es or (N)o", {'H':'Higher','L':'Lower'})
+            if play_again == "n":
+                break
 
-        play_again = ask_a_question("Do you want to play another round? (Y)es or (N)o", {'H':'Higher','L':'Lower'})
-        if play_again == "n":
-            break
+    def generate_deck():
+        suits = ['♥', '♦', '♠', '♣']  # Hearts, Diamonds, Spades, Clubs
+        ranks = {
+            '2': 2, '3': 3, '4': 4, '5': 5,
+            '6': 6, '7': 7, '8': 8, '9': 9,
+            '10': 10, 'J': 11, 'Q': 12, 'K': 13, 'A': 14
+        }
+        deck = [
+            {"card": rank + suit, "used": 0, "rank": ranks[rank]} 
+            for suit in suits
+            for rank in ranks
+        ]
+        return deck
 
-def generate_deck():
-    suits = ['♥', '♦', '♠', '♣']  # Hearts, Diamonds, Spades, Clubs
-    ranks = {
-        '2': 2, '3': 3, '4': 4, '5': 5,
-        '6': 6, '7': 7, '8': 8, '9': 9,
-        '10': 10, 'J': 11, 'Q': 12, 'K': 13, 'A': 14
-    }
-    deck = [
-        {"card": rank + suit, "used": 0, "rank": ranks[rank]} 
-        for suit in suits
-        for rank in ranks
-    ]
-    return deck
+    def pick_unused_card(deck):
+        unused_indexes = [index for index, card in enumerate(deck) if card["used"] == 0]
+        if len(unused_indexes) < 10:
+            print("There are less than 10 cards left! Regenerating deck.")
+            return generate_deck()
+        chosen_index = random.choice(unused_indexes)
+        deck[chosen_index]["used"] = 1
+        return deck[chosen_index]
 
-def pick_unused_card(deck):
-    unused_indexes = [index for index, card in enumerate(deck) if card["used"] == 0]
-    if len(unused_indexes) < 10:
-        print("There are less than 10 cards left! Regenerating deck.")
-        return generate_deck()
-    chosen_index = random.choice(unused_indexes)
-    deck[chosen_index]["used"] = 1
-    return deck[chosen_index]
+    def RugbyScore():
+        file_name= "rugby_tournament_scores"
+        file_path = file_name+".csv"
+        file_to_write = file_name+".txt"
+        data=ReadFile(file_path)
+        compiledString = ProcessData(data) #skip the header
+        print(compiledString)
+        WriteFile(file_to_write,compiledString)
 
-def RugbyScore():
-    file_name= "rugby_tournament_scores"
-    file_path = file_name+".csv"
-    file_to_write = file_name+".txt"
-    data=ReadFile(file_path)
-    compiledString = ProcessData(data) #skip the header
-    print(compiledString)
-    WriteFile(file_to_write,compiledString)
+    def ProcessData(data):
+        headers=data[0]
+        dataList=data[1:]
+        #countries = set(country for _, country, _ in dataList) # instead of hardcoding contruies, we create unique list from read contry Data column
+        countries = ["England","France","Ireland","Italy","Scotland","Wales"]
+        country_totals = [0] * 6
+        highest_scores = [0] * 6
+        players = [""] * 6
+        compiledString = ""
 
-def ProcessData(data):
-    headers=data[0]
-    dataList=data[1:]
-    #countries = set(country for _, country, _ in dataList) # instead of hardcoding contruies, we create unique list from read contry Data column
-    countries = ["England","France","Ireland","Italy","Scotland","Wales"]
-    country_totals = [0] * 6
-    highest_scores = [0] * 6
-    players = [""] * 6
-    compiledString = ""
+        for i in range(len(dataList)):
+            data_fields = dataList[i].split(",")
+            total_score = 0
+            country_index = countries.index(data_fields[2])
+            for j in range(3, 8):
+                total_score += safe_cast(data_fields[j], int, 0)
+            country_totals[country_index] += total_score
+            if total_score > highest_scores[country_index]:
+                highest_scores[country_index] = total_score
+                players[country_index] = f"{data_fields[0]} {data_fields[1]}" 
+                
+        for i in range(len(countries)):
+            compiledString += f"### {countries[i]}: ###\n\tTotal Score: {country_totals[i]}\n\tHighest Score: {players[i]} scored {highest_scores[i]}\n"
+        return compiledString
 
-    for i in range(len(dataList)):
-        data_fields = dataList[i].split(",")
-        total_score = 0
-        country_index = countries.index(data_fields[2])
-        for j in range(3, 8):
-            total_score += safe_cast(data_fields[j], int, 0)
-        country_totals[country_index] += total_score
-        if total_score > highest_scores[country_index]:
-            highest_scores[country_index] = total_score
-            players[country_index] = f"{data_fields[0]} {data_fields[1]}" 
-            
-    for i in range(len(countries)):
-        compiledString += f"### {countries[i]}: ###\n\tTotal Score: {country_totals[i]}\n\tHighest Score: {players[i]} scored {highest_scores[i]}\n"
-    return compiledString
+    def ReadFile(path):
+        try:
+            with open(path, 'r') as f:
+                data = f.readlines()
+            return data
+        except (ValueError, TypeError):
+            return []
 
-def ReadFile(path):
-    try:
-        with open(path, 'r') as f:
-            data = f.readlines()
-        return data
-    except (ValueError, TypeError):
-        return []
-
-def WriteFile(path, text):
-    try:
-        with open(path, "w") as f:
-            f.write(text)
-    except (ValueError, TypeError):
-        return []
-
-def safe_cast(value, to_type, default=None):
-    try:
-        return to_type(value)
-    except (ValueError, TypeError):
-        return default
+    def WriteFile(path, text):
+        try:
+            with open(path, "w") as f:
+                f.write(text)
+        except (ValueError, TypeError):
+            return []
 
 main()

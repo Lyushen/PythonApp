@@ -144,3 +144,9 @@ class Timer:
         end_time = time.perf_counter()
         print(f"Function '{func.__name__}' executed in: {end_time - start_time:.4f} seconds")
         return result
+    
+def safe_cast(value, to_type, default=None):
+    try:
+        return to_type(value)
+    except (ValueError, TypeError):
+        return default
