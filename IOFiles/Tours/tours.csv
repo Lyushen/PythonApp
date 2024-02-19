@@ -1,0 +1,11 @@
+id,destination,duration,price_pp,min_walkers,max_walkers
+1,Sugarloaf Mountain,3,10.0,5,12
+2,Grand Canyon,5,15.0,4,15
+3,Great Wall of China,2,8.0,6,10
+4,Machu Picchu,4,20.0,5,15
+5,Eiffel Tower,1,12.0,2,5
+6,Colosseum,2,9.0,4,8
+7,Pyramids of Giza,6,25.0,5,20
+8,Serengeti Safari,7,30.0,6,12
+9,Taj Mahal,2,11.0,3,7
+10,Great Barrier Reef,4,22.0,4,9

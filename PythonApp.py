@@ -1,7 +1,7 @@
-
 import random 
 import pygame as pg
 import sqlite3
+import csv
 #import pyodbc
 #import mysql connector
 import contextlib
@@ -12,7 +12,7 @@ from ExternalFuncs import safe_cast
 from ExternalFuncs import Timer
 
 def main():
-    timer = Timer(1)
+    timer=Timer(1)
     timer.start()
     #Day2()
     #Day3()
@@ -20,8 +20,133 @@ def main():
     #Day5()
     #Day6()
     #Day7()
-    Day71()
+    # Day71()
+    Day8()
     timer.stop()
+
+def Day8():
+    directory_path='IOFiles\\Tours\\'
+    table_headers={}
+    generate_w_data_preset(directory_path)
+    table_headers,tours_data=read_csv_file(directory_path,'tours',table_headers)
+    table_headers,guides_data=read_csv_file(directory_path,'guides',table_headers)
+    table_headers,completed_walks_data=read_csv_file(directory_path,'completed_walks',table_headers)
+    # print(table_headers,tours_data)
+    compiled_string=calculate(guides_data,completed_walks_data)
+    print(compiled_string)
+    display_the_guide_table(guides_data)
+    
+def display_the_guide_table(guides_data):
+    compiled_string = '\n'
+    header=f"{'Guide ID':<10} {'Guide Name':<15} {'Basic Rate':<15} {'Rate P/P':<15} {'Total Pay':<15} {'Total Income':<15}"
+    compiled_string+=header+'\n'
+    compiled_string+=('-' * len(header))+'\n'
+    for line in guides_data:
+        compiled_string += f"{line[0]:<10} {line[1]:<15} {float(line[2]):<15.2f} {float(line[3]):<15.2f} {line[4]:<15.2f} {line[5]:<15.2f}\n"
+    print(compiled_string)
+
+def read_csv_file(directory_path,filename,table_headers):
+    try:
+        full_file_path=directory_path+filename+'.csv'
+        with open(full_file_path, 'r', encoding="utf-8") as file:
+            table_headers[filename]=file.readline().strip().split(',')
+            data = []
+            for line in file:
+                splitted_data = line.strip().split(',')
+                data.append(splitted_data)
+        return table_headers, data
+    except Exception as e:
+        print(f"Error in reading file: {e}")
+
+def generate_w_data_preset(directory_path):
+    table_headers={
+        "tours":['id','destination','duration','price_pp','min_walkers','max_walkers'],
+        "guides":['id','name','basic_rate','rate_pp'],
+        "completed_walks":['id','tour_id','guide_id','walkers']}
+    tours_data=[
+        [1,'Sugarloaf Mountain', 3, 10.00, 5, 12],
+        [2,'Grand Canyon', 5, 15.00, 4, 15],
+        [3,'Great Wall of China', 2, 8.00, 6, 10],
+        [4,'Machu Picchu', 4, 20.00, 5, 15],
+        [5,'Eiffel Tower', 1, 12.00, 2, 5],
+        [6,'Colosseum', 2, 9.00, 4, 8],
+        [7,'Pyramids of Giza', 6, 25.00, 5, 20],
+        [8,'Serengeti Safari', 7, 30.00, 6, 12],
+        [9,'Taj Mahal', 2, 11.00, 3, 7],
+        [10,'Great Barrier Reef', 4, 22.00, 4, 9]]
+    guides_data=[
+        [1,'Barbara', 12.50, 1.25],
+        [2,'Eddie', 15.00, 2.00],
+        [3,'Jessica', 10.00, 0.75],
+        [4,'Michael', 18.00, 2.50],
+        [5,'Sophia', 14.00, 1.50],
+        [6,'Liam', 16.00, 2.25],
+        [7,'Emma', 13.00, 1.00],
+        [8,'Oliver', 17.50, 2.75],
+        [9,'Isabella', 11.50, 1.25],
+        [10,'James', 19.00, 3.00]]
+    completed_walks_data=[
+        [1, 1, 1, 10],
+        [2, 2, 2, 8],
+        [3, 3, 3, 12],
+        [4, 4, 4, 7],
+        [5, 5, 5, 5],
+        [6, 1, 6, 9],
+        [7, 2, 7, 15],
+        [8, 3, 8, 11],
+        [9, 4, 9, 6],
+        [10,5, 10, 8]]
+    mapped_data = {
+        "tours.csv": tours_data,
+        "guides.csv": guides_data,
+        "completed_walks.csv": completed_walks_data
+        }
+    alternative_generate_CSV(table_headers,mapped_data,directory_path)
+
+def generate_CSV(tables_n_headers,mapped_data,directory_path):
+        for filename, headers in tables_n_headers.items():
+            try:
+                with open(f"{directory_path}{filename}.csv", 'w', newline='', encoding='utf-8-sig') as csvfile:
+                    writer = csv.writer(csvfile)
+                    writer.writerow(headers)  # Writing the header
+                    writer.writerows(mapped_data[f"{filename}.csv"])
+            except Exception as e:
+                print(f"Error in writing the file: {e}")
+
+def alternative_generate_CSV(tables_n_headers,mapped_data,directory_path):
+    for filename, headers in tables_n_headers.items():
+        try:
+            content = ','.join(headers) + '\n' # Start with the header row
+            data_rows = mapped_data[f"{filename}.csv"] # Compile data rows into a single string for each file
+            for row in data_rows:
+                content += ','.join([str(item) for item in row]) + '\n' # Convert each item to string, join with commas, and add a newline at the end
+            file_path = f"{directory_path}{filename}.csv" # Now write the compiled content to the file
+            with open(file_path, 'w', newline='', encoding='utf-8') as csvfile:
+                csvfile.write(content)
+        except Exception as e:
+            print(f"Error in writing the file: {e}")
+
+def calculate(guides_data:list,completed_walks_data:list): # 1. Calculate, Display and Write total pay for each guide  
+    compiled_string=''
+    header = f"\n{'Guide ID':<10} {'Guide Name':<15} {'Total Pay':<15} {'Total Income':<15}"
+    compiled_string+=header+'\n'
+    compiled_string+=('-' * len(header))+'\n'  # Separator
+    for guide in guides_data:
+        guide_id=guide[0]
+        guide_name=guide[1]
+        guide_basic_rate=safe_cast(guide[2],float)
+        guide_rate_pp=safe_cast(guide[3],float)
+        total_pay=0
+        total_income=0
+        for cw in completed_walks_data:
+            if guide_id==cw[2]:
+                walkers=safe_cast(cw[3],int)
+                total_income+=walkers*guide_rate_pp
+                total_pay+=guide_basic_rate+total_income
+                compiled_string+=(f"{guide_id:<10} {guide_name:<15} {total_pay:<15.2f} {total_income:<15.2f}")+'\n'
+        guide.append(total_pay) # add data to the original guides_data
+        guide.append(total_income)
+    return compiled_string
 
 def Day71():
     minimal_csv()
@@ -116,10 +241,11 @@ def Day7(): #Mock Assignment task SQL Lite
         # 4.0 Test & Review
             # • Outline and justify a strategy to test this application.
             # • Discuss the shortcoming / potential improvements for the application.
-    
-    db_name='mockdb.db'
-    create_tables(db_name)
-    populate_tables(db_name)
+    db_work_dir='IOFiles\\SQL_Lite_DB\\'
+    db_name='mockdb'
+    db_path=db_work_dir+db_name+'.db'
+    create_tables(db_path)
+    populate_tables(db_path)
     
     # table_names=['tours','guides','completed_walks']    
     new_tour={
@@ -129,7 +255,7 @@ def Day7(): #Mock Assignment task SQL Lite
         "min_walkers":12,
         "max_walkers":12,
     }
-    insert_tour(db_name,new_tour)
+    insert_tour(db_path,new_tour)
     tour_data={
         "destination":'Home Run',
         "duration":6,
@@ -137,12 +263,12 @@ def Day7(): #Mock Assignment task SQL Lite
         "min_walkers":6,
         "max_walkers":16,
     }
-    update_tour(db_name,tour_data)
+    update_tour(db_path,tour_data)
     del_tour_name='Home Run'
-    delete_tour(db_name,del_tour_name)
-    starts_per_each_guide=each_guide_calc(db_name) # Calculate and Display pay earned by each guide and total income
+    delete_tour(db_path,del_tour_name)
+    starts_per_each_guide=each_guide_calc(db_path) # Calculate and Display pay earned by each guide and total income
     display_stats(starts_per_each_guide)
-    tour_profit_loss=calculate_tour_profit_loss(db_name)
+    tour_profit_loss=calculate_tour_profit_loss(db_path)
     display_tour_profit_loss(tour_profit_loss)
 
     #print(pay_for_each_guide(db_name)) # 1. Display pay for each guide
@@ -255,9 +381,7 @@ def Day7(): #Mock Assignment task SQL Lite
         cur = con.cursor()
         update_sql = "UPDATE tours SET " # Base SQL UPDATE statement
         params = [] # Initialize a list to hold the SQL parameter values
-        
-        # Dynamically build the SET part of the SQL statement based on the tour_data dictionary
-        set_clauses = []
+        set_clauses = [] # Dynamically build the SET part of the SQL statement based on the tour_data dictionary
         for key, value in tour_data.items():
             if key != 'destination':  # Exclude the destination key from the SET clause
                 set_clauses.append(f"{key} = ?")
@@ -353,7 +477,7 @@ def Day6():
     # Employee with Most Hours Worked: Alex Murphy
     # ...cont'd.
     file_name='SD-TA-001-A_OrganisationWeeklyTimesheet'
-    work_director='IOFiles\\'
+    work_director='IOFiles\\Departments\\'
     input_csv_fpath=work_director+file_name+'.csv'
     output_csv_fpath=work_director+'output_'+file_name+'.csv'
     output_txt_fpath=work_director+file_name+'.txt'
@@ -438,20 +562,7 @@ def Day6():
             compiled_txt += f'Employee with Most Hours Worked:\t{top_name} with {top_hours} hours\n'
         timer3.stop()
         return compiled_txt
-        
-    def to_int_days(headers,data):
-        day_to_int = {day: index for index, day in enumerate(headers, start=3)}
-        converted_data = []
-        for row in data:
-            converted_row = {key: (day_to_int[value] if key in day_to_int else value) for key, value in row.items()}
-            converted_data.append(converted_row)
-        return converted_data
 
-    def display(headers,data):
-        print(headers)
-        for row in data:
-            print(row)
-                
     def read_file(file_path):
         data = []
         headers = []
@@ -461,7 +572,7 @@ def Day6():
                 lines = content.strip().split('\n')  # Split content into lines
                 headers = lines[0].split(',')  # Extract headers
                 for line in lines[1:]:
-                    values = line.split(',')
+                    values = [value.strip() for value in line.split(',')] # Strip() (trim) all separate values # values = line.split(',')
                     row_dict = dict(zip(headers, values))
                     data.append(row_dict)
         except Exception as e:
@@ -478,6 +589,17 @@ def Day6():
                 file.write(compiled_string)
         except Exception as e:
             print(f"Error in writing the file: {e}")
+    def to_int_days(headers,data):
+        day_to_int = {day: index for index, day in enumerate(headers, start=3)}
+        converted_data = []
+        for row in data:
+            converted_row = {key: (day_to_int[value] if key in day_to_int else value) for key, value in row.items()}
+            converted_data.append(converted_row)
+        return converted_data
+    def display(headers,data):
+        print(headers)
+        for row in data:
+            print(row)
 
 def Day5():
     # Create an application for ABC company, database ABC_Company and a table Employee 
@@ -1186,9 +1308,10 @@ def Day1():
         return deck[chosen_index]
 
     def RugbyScore():
+        files_dir="IOFiles\\Rugby\\"
         file_name= "rugby_tournament_scores"
-        file_path = file_name+".csv"
-        file_to_write = file_name+".txt"
+        file_path = files_dir+file_name+".csv"
+        file_to_write = files_dir+file_name+".txt"
         data=ReadFile(file_path)
         compiledString = ProcessData(data) #skip the header
         print(compiledString)

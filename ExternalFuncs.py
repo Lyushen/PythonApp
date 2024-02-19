@@ -48,7 +48,7 @@ def ask_in_range(message, range_limits=[1.0, 5.0], input_type=float):
         except ValueError:
             print(f"Invalid input: Please enter a valid {'integer' if input_type == int else 'number'}.")
 
-def ask_a_question(message, possible_answers={'Y': 'Yes', 'N': 'No'},optional_dict={}):
+def ask_a_question(message, possible_answers={'Y': 'Yes', 'N': 'No'}):
     options_str = ', '.join([f"({key}) for {value}" for key, value in possible_answers.items()])
     full_message = f"{message} Possible answers are {options_str}."
     possible_answers_lower = {key.lower(): value for key, value in possible_answers.items()}
