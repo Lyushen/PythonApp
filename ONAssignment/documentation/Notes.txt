@@ -1,0 +1,22 @@
+2. Design document – CSV approach
+Assamtions:
+	Following stake convention
+	safe_cast function
+Total_Earnings = (Module Duration Days * Tutor's Basic Daily Rate) + (Module Duration Days * Number of Students * Tutor's Bonus per Student)"
+	Assumed that client requested CSV database structure as it's easy to edit for non-technical users
+•	Assumed the taxes are the client’s responsibility
+•	Assumed editing CSV files directly
+•	Assuming that the clinet requested the data generation from the program and write those csv
+1.	Read CSV
+2.	Store information in lists …
+3.	Explanation of the design
+4.	Files, and structure of the tables.
+5.	Style conventions
+6.	Hints of datatypes
+3. Coding
+
+4. Test how? What happens if the file doesn’t exist? Completed courses with no tutor in it.
+
+Recommendation for Improvements:  Update Delete
+Console interface
+Opportunity for improvements

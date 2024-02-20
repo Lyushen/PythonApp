@@ -42,7 +42,7 @@ def display_the_guide_table(guides_data):
     compiled_string+=header+'\n'
     compiled_string+=('-' * len(header))+'\n'
     for line in guides_data:
-        compiled_string += f"{line[0]:<10} {line[1]:<15} {float(line[2]):<15.2f} {float(line[3]):<15.2f} {line[4]:<15.2f} {line[5]:<15.2f}\n"
+        compiled_string += f"{line[0]:<10} {line[1]:<15} {safe_cast(line[2],float):<15.2f} {safe_cast(line[3],float):<15.2f} {line[4]:<15.2f} {line[5]:<15.2f}\n"
     print(compiled_string)
 
 def read_csv_file(directory_path,filename,table_headers):

@@ -1,0 +1,8 @@
+
+Tutor ID   Tutor Name      Daily Rate      Rate P/P        Total Ernings  
+--------------------------------------------------------------------------
+1          Alex Johnson    113.50          1.80            5479.50        
+2          Chris Lee       143.00          1.30            1289.60        
+3          Jordan Smith    149.00          1.30            3558.80        
+4          Taylor Brown    144.10          1.90            3848.20        
+5          Morgan Davis    84.00           2.90            3824.80        
