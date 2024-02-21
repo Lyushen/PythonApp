@@ -10,6 +10,7 @@ from ExternalFuncs import ask_a_question
 from ExternalFuncs import style
 from ExternalFuncs import safe_cast
 from ExternalFuncs import Timer
+import copy
 
 def main():
     timer=Timer(1)
@@ -21,8 +22,122 @@ def main():
     #Day6()
     #Day7()
     # Day71()
-    Day8()
+    # Day8()
+    Day9()
+    print()
     timer.stop()
+    
+def Day9():
+    def Task1():
+        class Student:
+            def __init__ (self, first_name:str,lastname:str,age:int,fees_due:float):
+                self.first_name=first_name
+                self.last_name=lastname # declaring a property that will be visible and value assigned from recieved parameter
+                self.full_name=first_name+' '+lastname
+                self.age=age
+                self.fees_due=fees_due
+            def __repr__(self):
+                return f'Type Student: {self.first_name}, {self.last_name}, {self.full_name}, {self.age}, {self.fees_due}'
+            def __str__(self) -> str:
+                header='\n'+f"{'First Name':<15} {'Last Name':<15} {'Full Name':<15} {'Age':<10} {'Fees Duet':<10}"
+                output_str=header
+                output_str+='\n'+('—' * len(header))+'\n'
+                output_str+=f'{self.first_name:<15} {self.last_name:<15} {self.full_name:<15} {self.age:<10} €{self.fees_due:<10.2f}'+'\n'
+                return output_str
+        class StudentManager:
+            def __init__(self) -> None:
+                self.students=[]
+
+        # s1=Student('Tom','Taylor',36,13.1)
+        # print(s1)
+        # del s1.age
+        # s1.age=33
+        # print(s1)
+        # print(s1.__repr__)
+        # print(Student.__dict__)
+        s_manager=StudentManager()
+        print(len(s_manager.students))
+        s_manager.students.append(Student('Tom','Taylor',36,13.1))
+        print(len(s_manager.students))
+        print(s_manager.students[0])
+        print(s_manager.students[0].age)
+
+    def Task2():
+        class Student:
+            def __init__ (self, first_name:str,lastname:str,age:int,fees_due:float):
+                self.first_name=first_name
+                self.last_name=lastname # declaring a property that will be visible and value assigned from recieved parameter
+                self.full_name=first_name+' '+lastname
+                self.age=age
+                self.fees_due=fees_due
+            def __repr__(self):
+                return f'Type Student: {self.first_name}, {self.last_name}, {self.full_name}, {self.age}, {self.fees_due}'
+            def __str__(self) -> str:
+                header='\n'+f"{'First Name':<15} {'Last Name':<15} {'Full Name':<15} {'Age':<10} {'Fees Duet':<10}"
+                output_str=header
+                output_str+='\n'+('—' * len(header))+'\n'
+                output_str+=f'{self.first_name:<15} {self.last_name:<15} {self.full_name:<15} {self.age:<10} €{self.fees_due:<10.2f}'+'\n'
+                return output_str
+
+        class Course:
+            def __init__(self) -> None:
+                pass
+            
+        class StudentManager:
+            def __init__(self) -> None:
+                self.students=[]
+
+            def __str__(self):
+                return self.format_students(self.students)
+
+            @staticmethod # declraring the method as static and wont create self object on all call
+            def format_students(students_list):
+                    header = '\n' + f"{'Full Name':<15} {'Age':<7} {'Fees Due':<10}" #f"{'First Name':<15} {'Last Name':<15}
+                    output_str = header
+                    output_str += '\n' + ('—' * len(header)) + '\n'
+                    for student in students_list:
+                        output_str += f'{student.full_name:<15} {student.age:<7} €{student.fees_due:<10.2f}' + '\n' #f'{student.first_name:<15} {student.last_name:<15}
+                    return output_str
+
+            def get_table_under18(self): # Use the same formatting logic for students under 18
+                under18_students = self.under18_list()
+                return self.format_students(under18_students)
+            
+            # @property # Decoration of the property, will be called all the time when we accessing the property -> student_manager.fees_sum
+            def total_fees(self):
+                return sum(student.fees_due for student in self.students)
+            
+            def under18_list(self):
+                return [student for student in self.students if student.age < 18]
+            
+            def add_student(self,first_name:str,last_name:str,age:int,fees_due:float):
+                self.students.append(Student(first_name, last_name, age, fees_due))
+                
+            def add_multiple_students(self,student_list:list):
+                self.students.extend(copy.deepcopy(student_list))
+        
+        sm=StudentManager()
+        sm.add_student("John", "Doe", 20, 150.50)
+        sm.add_student("Jane", "Smith", 19, 120.75)
+        sm.add_student("Mike", "Johnson", 21, 130.00)
+        sm.add_student("Emily", "Davis", 17, 140.25)
+        sm.add_student("Chris", "Brown", 20, 160.40)
+        more_students=[
+            Student("Alex", "Turner", 18, 145.75),
+            Student("Lily", "Evans", 17, 135.00),
+            Student("James", "Potter", 20, 155.25),
+            Student("Nina", "Simone", 19, 165.50),
+            Student("Oscar", "Wilde", 21, 175.80),]
+        sm.add_multiple_students(more_students)
+        print(sm)
+
+        # print(f"Total Fees: {sm.total_fees()}")
+        # print(f"Students Under 18: {len(sm.under18())}")
+        print(sm.get_table_under18())
+        # print(sm.format_students(sm.under18_list()))
+        
+    # Task1()
+    Task2()
 
 def Day8():
     directory_path='IOFiles\\Tours\\'

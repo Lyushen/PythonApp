@@ -1,8 +1,8 @@
 
 Module ID  Module Name                         Duration Days   Price P/P       Total Profit   
 ----------------------------------------------------------------------------------------------
-1          Customer Support Provision          19              409.48          6021.92        
-2          Software Development and Design     8               247.35          2300.70        
-3          Web Development                     10              184.33          3565.84        
-4          Data and Cyber Security             13              495.57          13802.48       
-5          Software Development Using SQL      12              251.41          212.88         
+1          Customer Support Provision          19              €409.48          €6021.92        
+2          Software Development and Design     8               €247.35          €2300.70        
+3          Web Development                     10              €184.33          €3565.84        
+4          Data and Cyber Security             13              €495.57          €13802.48       
+5          Software Development Using SQL      12              €251.41          €212.88         

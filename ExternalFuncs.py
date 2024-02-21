@@ -148,5 +148,5 @@ class Timer:
 def safe_cast(value, to_type, default=None):
     try:
         return to_type(value)
-    except (ValueError, TypeError):
-        return default
+    except (ValueError, TypeError) as ex:
+        print(f'Error during convertation {ex}')
