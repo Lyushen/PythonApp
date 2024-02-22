@@ -13,6 +13,8 @@ from ExternalFuncs import Timer
 import copy
 
 def main():
+    global EURO
+    EURO='€'
     timer=Timer(1)
     timer.start()
     #Day2()
@@ -23,9 +25,205 @@ def main():
     #Day7()
     # Day71()
     # Day8()
-    Day9()
+    # Day9()
+    Day10()
     print()
     timer.stop()
+ 
+def Day10():
+    def Task1():
+        my_tuple=(1,2,3,4,5,6,7,8,'A')
+        print(my_tuple)
+        my_list=[1,2,3,4,5,6,7,8]
+        print(my_list)
+        #del my_tuple[1] # 'tuple' object doesn't support item deletion / or modification
+        print(len(my_tuple))
+        my_list2=[1,2,3,4,5,6,7,8,'A']
+        my_list2.append(my_tuple)
+        print(my_list2)
+        my_list3=[1,2,3,4,5,6,7,8,'A']
+        my_list3.extend(my_tuple)
+        print(my_list3)
+        print(len(my_list3))
+        print(my_list3.pop())
+        print(len(my_list3))
+        print('='*100)
+        my_tuple4=my_tuple
+        # my_tuple4[2]= "New"
+        my_list4=[1,2,3,4,5,6,7,8,'A']
+        my_list4[2]='New'
+        print(my_list4)
+        print(my_tuple4)
+        print(my_list4.__str__)
+        my_list5=my_list4
+        print(my_list4)
+        
+        print(my_list5.__str__)
+        my_list5.append("New")
+        print(my_list5)
+        print(my_list5.__str__)
+        print(my_list4)
+        my_list4[0]=my_list4
+        print(my_list4.__str__)
+        print(my_list4[0][0][0][0])
+        
+        my_tuple6=(1,2,3,4,5,6,7,8,'A')
+        print(f'my_tuple6 -> {my_tuple6}')
+        print(f'my_tuple6 -> {my_tuple6.__repr__}')
+        my_tuple7=my_tuple6
+        print(f'my_tuple6[:] -> {my_tuple6[:]}')
+        print(f'my_tuple6[:] -> {my_tuple6.__repr__}')
+        print(f'my_tuple7[:] -> {my_tuple7[:]}')
+        print(f'my_tuple7[:] -> {my_tuple7.__repr__}')
+        print(f'my_tuple7[1:] -> {my_tuple7[1:]}')
+        print(f'my_tuple7[1:] -> {my_tuple7.__repr__}')
+        
+    def Task2():
+        class Student:
+            _last_id = 0
+            subject='Coding' # this property will have all children of the object
+            def __init__(self,first_name:str,last_name:str,age:int,fees_due:float) -> None:
+                Student._last_id += 1
+                self.id = Student._last_id
+                self.first_name=first_name
+                self.last_name=last_name
+                self.full_name=first_name+' '+last_name
+                self.age=age
+                self.fees_due=fees_due
+            def __str__(self) -> str:
+                return f'Student: {self.id},{self.first_name}, {self.last_name}, {self.full_name}, {self.age}, {self.fees_due}, {self.subject}'
+                
+        class StudentManager:
+            """A manager of the student class."""
+            def __init__(self) -> None:
+                self.__students=[]
+
+            def __str__(self):
+                return self.format_students(self.__students)
+
+            @staticmethod # declraring the method as static and wont create self object on all call
+            def format_students(students_list:list):
+                    header = '\n' + f"{'ID':<5} {'Full Name':<15} {'Age':<7} {'Fees Due':<10}" #f"{'First Name':<15} {'Last Name':<15}
+                    output_str = header
+                    output_str += '\n' + ('—' * len(header)) + '\n'
+                    for student in students_list:
+                        output_str += f'{student.id:<5} {student.full_name:<15} {student.age:<7} {EURO}{student.fees_due:<10.2f}' + '\n' #f'{student.first_name:<15} {student.last_name:<15}
+                    return output_str
+
+            def get_table_under18(self): # Use the formatting logic for students under 18
+                under18_students = self.under18_list()
+                return self.format_students(under18_students)
+            
+            def total_fees(self):
+                """# @property # Decoration of the property, will be called all the time when we accessing the property -> student_manager.fees_sum"""
+                return sum(student.fees_due for student in self.__students)
+            
+            def under18_list(self):
+                return [student for student in self.__students if student.age < 18]
+            
+            def add_student(self,first_name:str,last_name:str,age:int,fees_due:float):
+                self.__students.append(Student(first_name, last_name, age, fees_due))
+                
+            def add_multiple_students(self,student_list:list):
+                self.__students.extend(copy.deepcopy(student_list))
+            
+            def remove_student(self, student):
+                """Remove a student from the private list if present."""
+                if student in self.__students:
+                    self.__students.remove(student)
+            
+            def get_students_v1(self):
+                """Return a copy of the private students list to prevent direct modification."""
+                return self.__students[:]  
+            def get_students_v2(self):
+                """Return a copy of the private students list to prevent direct modification."""
+                return (self.__students) 
+            def get_students_v3(self):
+                """Return a copy of the private students list to prevent direct modification."""
+                return copy.copy(self.__students)
+            def get_students_v4(self):
+                """Return a copy of the private students list to prevent direct modification."""
+                return copy.deepcopy(self.__students)
+            
+            def find_student(self, criteria):
+                """Find and return students matching the given criteria.
+                Example criteria: a lambda function that takes a student and returns True or False"""
+                return [student for student in self.__students if criteria(student)]
+        
+        sm=StudentManager()
+        ttc_students=[
+            Student("John", "Doe", 20, 150.50),
+            Student("Jane", "Smith", 19, 120.75),
+            Student("Mike", "Johnson", 21, 130.00),
+            Student("Emily", "Davis", 17, 140.25),
+            Student("Chris", "Brown", 20, 160.40),
+            Student("Alex", "Turner", 18, 145.75),
+            Student("Lily", "Evans", 17, 135.00),
+            Student("James", "Potter", 20, 155.25),
+            Student("Nina", "Simone", 19, 165.50),
+            Student("Oscar", "Wilde", 21, 175.80),]
+        sm.add_multiple_students(ttc_students)
+        # sm.students=ttc_students
+        # print(StudentManager.format_students(ttc_students))
+        print(sm)
+        # print(sm.get_students.__repr__)
+        # print(ttc_students.__repr__)
+        # print('get_students_v1')
+        # for student in sm.get_students_v1():
+        #     print(student)
+        # print('get_students_v2')
+        # for student in sm.get_students_v2():
+        #     print(student)
+        # print('get_students_v3')
+        # for student in sm.get_students_v3():
+        #     print(student)
+        Student.subject='C#'
+        
+    def Task3():
+        class Snake_Ladder:
+            _ladders_snakes = {1: 37, 4: 10, 9: 22, 21: 21, 28: 56, 36: 8, 51: 16, 80: 19, 16: -10, 47: -21, 49: -38, 56: -3, 62: -43, 64: -4, 87: -63, 93: -20, 95: -20, 98: -20}
+            def player(self,id:int,name:str,position:int):
+                self.id=id
+                self.position=position
+                self.name=self.get_color(name)
+                
+            def __init__(self, position) -> None:
+                pass
+            @staticmethod
+            def get_color(string):
+                return 
+            
+            
+        class GameManager:
+            def __init__(self) -> None:
+                self.players=[]
+            
+            def calculate_move(self, player_colour:str,player_name:str,player_position:int):
+                dice_roll=self.throw_a_dice()
+                previous_position=player_position
+                new_position=player_position+dice_roll
+                if dice_roll==6:
+                    return f'extra turn'
+                
+                if new_position==100:
+                    player_position=100
+                    return (player_colour,player_name,player_position,f'Player {player_name} threw {dice_roll} and finished the game')
+                elif new_position>100:
+                    return (player_colour,player_name,player_position,f'Player {player_name} threw {dice_roll} and went more than a board, he will return to {player_position}')
+                else: 
+                    for sl_key,sl_value in self._ladders_snakes.items():
+                        if new_position==sl_key:
+                            if not player_position+sl_key<0:
+                                player_position+=sl_value
+                            ladder_or_snake = 'ladder' if sl_value > 0 else 'snake'
+                            return (player_colour,player_name,player_position,f'Player {player_name} threw {dice_roll} and moved from {previous_position} to {previous_position+sl_value} where is a {ladder_or_snake} that moved him to {player_position}')
+            def throw_a_dice(self):
+                return random(1,7)
+
+        
+    # Task1()
+    # Task2()
+    Task3()
     
 def Day9():
     def Task1():
@@ -64,26 +262,28 @@ def Day9():
 
     def Task2():
         class Student:
+            """A class to represent a student."""
+            _last_id=0
             def __init__ (self, first_name:str,lastname:str,age:int,fees_due:float):
+                Student._last_id+=1
+                self.id = Student._last_id
                 self.first_name=first_name
                 self.last_name=lastname # declaring a property that will be visible and value assigned from recieved parameter
                 self.full_name=first_name+' '+lastname
                 self.age=age
                 self.fees_due=fees_due
             def __repr__(self):
-                return f'Type Student: {self.first_name}, {self.last_name}, {self.full_name}, {self.age}, {self.fees_due}'
+                return f'Type Student: {self.id}, {self.first_name}, {self.last_name}, {self.full_name}, {self.age}, {self.fees_due}'
             def __str__(self) -> str:
-                header='\n'+f"{'First Name':<15} {'Last Name':<15} {'Full Name':<15} {'Age':<10} {'Fees Duet':<10}"
-                output_str=header
-                output_str+='\n'+('—' * len(header))+'\n'
-                output_str+=f'{self.first_name:<15} {self.last_name:<15} {self.full_name:<15} {self.age:<10} €{self.fees_due:<10.2f}'+'\n'
-                return output_str
+                return f'Student: {self.id},{self.first_name}, {self.last_name}, {self.full_name}, {self.age}, {self.fees_due}'
 
         class Course:
-            def __init__(self) -> None:
-                pass
+             def __init__(self, name:str, topics:list):
+                self.name = name
+                self.topics=topics
             
         class StudentManager:
+            """A manager of the student class."""
             def __init__(self) -> None:
                 self.students=[]
 
@@ -91,12 +291,12 @@ def Day9():
                 return self.format_students(self.students)
 
             @staticmethod # declraring the method as static and wont create self object on all call
-            def format_students(students_list):
-                    header = '\n' + f"{'Full Name':<15} {'Age':<7} {'Fees Due':<10}" #f"{'First Name':<15} {'Last Name':<15}
+            def format_students(students_list:list):
+                    header = '\n' + f"{'ID':<5} {'Full Name':<15} {'Age':<7} {'Fees Due':<10}" #f"{'First Name':<15} {'Last Name':<15}
                     output_str = header
                     output_str += '\n' + ('—' * len(header)) + '\n'
                     for student in students_list:
-                        output_str += f'{student.full_name:<15} {student.age:<7} €{student.fees_due:<10.2f}' + '\n' #f'{student.first_name:<15} {student.last_name:<15}
+                        output_str += f'{student.id:<5} {student.full_name:<15} {student.age:<7} €{student.fees_due:<10.2f}' + '\n' #f'{student.first_name:<15} {student.last_name:<15}
                     return output_str
 
             def get_table_under18(self): # Use the same formatting logic for students under 18
@@ -131,10 +331,10 @@ def Day9():
         sm.add_multiple_students(more_students)
         print(sm)
 
-        # print(f"Total Fees: {sm.total_fees()}")
+        print(f"Total Fees: {EURO}{sm.total_fees()}")
         # print(f"Students Under 18: {len(sm.under18())}")
-        print(sm.get_table_under18())
-        # print(sm.format_students(sm.under18_list()))
+        print(sm.get_table_under18()) # alternative use print(sm.format_students(sm.under18_list()))
+        
         
     # Task1()
     Task2()
