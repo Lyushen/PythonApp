@@ -11,6 +11,7 @@ from ExternalFuncs import style
 from ExternalFuncs import safe_cast
 from ExternalFuncs import Timer
 import copy
+import tkinter as tk
 
 def main():
     global EURO
@@ -26,10 +27,160 @@ def main():
     # Day71()
     # Day8()
     # Day9()
-    Day10()
+    # Day10()
+    Day11()
     print()
     timer.stop()
  
+def Day11():
+    def Task1():
+        class Application(tk.Frame):
+            def __init__(self, master=None):
+                super().__init__(master)  # Use super() for a cleaner call to the parent class
+                self.master = master
+                # self.pack(fill=tk.BOTH, expand=True)
+                # self.createWidgets()
+
+            def createWidgets(self):
+                self.medialLabel = tk.Label(self, text='Hello World')
+                self.medialLabel.config(bg="#d3ffb8")
+                self.medialLabel.pack(pady=20)  # Use pack for consistent geometry management         
+                self.bottomFrame = tk.Frame(self) # Frame for the quit button, at the bottom right
+                self.bottomFrame.pack(side=tk.BOTTOM, fill=tk.X, anchor='e', padx=10, pady=10)  # Anchor east (right), with padding
+                self.quitButton = tk.Button(self.bottomFrame, text='Quit', command=self.master.destroy)
+                self.quitButton.pack(side=tk.RIGHT)  # Pack to the right within bottomFrame
+
+        def roll_the_dice(my_label):
+            rolled=random.randrange(1,7)
+            my_label.config(text=rolled)
+            # my_label.config(text=datetime.datetime.now())
+            
+        def insert_the_text(entry,my_label):
+            text_from_label=entry.get()
+            if text_from_label=="":
+                roll_the_dice(my_label)
+            else: 
+                entry.delete(0, tk.END)
+                my_label.config(text=text_from_label)
+        
+        # root = tk.Tk()
+        # app = Application(master=root)
+        # root.title('UI Application in OOP')
+        # root.geometry('400x200+-7+0') #(sizeX)x(sizeY)+(positionX)+(PositionY)
+        img = tk.PhotoImage(file='images/funny-cat.png')
+        root = tk.Tk()
+        root.geometry('400x200+-7+0')
+        background_label = tk.Label(root, image=img)
+        background_label.place(x=0, y=0, relwidth=1, relheight=1)  # Place the label to cover the entire window
+        my_label=tk.Label(root,text='Simple Dice Game',font=('Aptos',12),relief='groove',borderwidth=1)
+        my_label.pack(padx=5,pady=5)
+        entry1 = tk.Entry(root,text='Add some text to label',font=('Aptos',12))
+        entry1.pack(padx=5,pady=5)
+        buttonframe=tk.Frame(root)
+        buttonframe.columnconfigure(0,weight=1)
+        buttonframe.columnconfigure(1,weight=1)
+        buttonframe.columnconfigure(2,weight=1)
+        my_button = tk.Button(root, text="Roll the dice", padx=10, pady=5, command=lambda: insert_the_text(entry1,my_label),font=('Aptos',12))
+        def on_enter(e):
+            e.widget.config(bg='lightblue')  # Change to desired hover color
+        def on_leave(e):
+            e.widget.config(bg='SystemButtonFace')
+        my_button.pack(padx=10,pady=10)
+        my_button.bind("<Enter>", on_enter)
+        my_button.bind("<Leave>", on_leave)
+        entry1.bind("<Enter>", on_enter)
+        entry1.bind("<Leave>", on_leave)
+        my_label.bind("<Enter>", on_enter)
+        my_label.bind("<Leave>", on_leave)
+        root.mainloop()
+
+    def Task2():
+        class Application():
+            def __init__(self):
+                self.root = tk.Tk()
+                self.root.title("Dice Roller")
+                self.root.geometry("400x370")  # Set the window geometry
+                self.balance_value=500
+                self.dice_images = [tk.PhotoImage(file='images\\'+f'dice_{i}.png') for i in range(1, 7)]  # Load dice images
+                self.createWidgets()
+                self.root.mainloop()  # Start the Tkinter event loop
+
+            def createWidgets(self):
+                # Using grid layout for precise placement
+                self.root.grid_columnconfigure(0, weight=1)  # Configure the column 0 to expand with the window
+                self.root.grid_columnconfigure(1, weight=1)  # Configure the column 1 to expand with the window
+                
+                # Label for the dice game title, spanning two columns
+                self.dice_label = tk.Label(self.root, text='Simple Dice Game', font=('Arial', 12))
+                self.dice_label.grid(row=0, column=0, columnspan=2, padx=5, pady=5, sticky='ew')  # 'ew' = east+west
+                
+                # Label and Entry for the user's guess
+                self.guess_label = tk.Label(self.root, text="Your guess:", font=('Arial', 12))
+                self.guess_label.grid(row=1, column=0, padx=5, pady=5, sticky='e')  # Align to the east (right) of the column
+                self.entry_guess = tk.Entry(self.root, font=('Arial', 12))
+                self.entry_guess.grid(row=1, column=1, padx=5, pady=5, sticky='w')  # Align to the west (left) of the column
+                
+                # Label and Entry for the user's bet
+                self.bet_label = tk.Label(self.root, text="Your bet:", font=('Arial', 12))
+                self.bet_label.grid(row=2, column=0, padx=5, pady=5, sticky='e')
+                self.entry_bet = tk.Entry(self.root, font=('Arial', 12))
+                self.entry_bet.grid(row=2, column=1, padx=5, pady=5, sticky='w')
+                
+                # Button to roll the dice
+                self.dice_button = tk.Button(self.root, text="Roll the dice", padx=10, pady=5, command=self.get_a_guess, font=('Arial', 12))
+                self.dice_button.grid(row=3, column=0, columnspan=2, padx=5, pady=5, sticky='ew')
+                
+                # Label for displaying the dice image, centered below the button
+                self.dice_label_image = tk.Label(self.root)
+                self.dice_label_image.grid(row=4, column=0, columnspan=2, padx=10, pady=10, sticky='n')
+                
+                # Lable for Balance and Balance
+                self.balance_lable=tk.Label(self.root, text="Balance: ", font=('Arial', 12))
+                self.balance_lable.grid(row=5,column=0, columnspan=2, padx=10, pady=10, sticky='n')
+                self.balance=tk.Label(self.root, text=self.balance_value, font=('Arial', 12),relief='groove', borderwidth=1)
+                self.balance.grid(row=5,column=1, columnspan=2, padx=10, pady=10, sticky='n')
+                
+                # Frame for the quit button, at the bottom right
+                self.bottomFrame = tk.Frame(self.root)
+                self.bottomFrame.grid(row=5, column=1, sticky='e', padx=10, pady=10)
+                
+                # Button to quit the application
+                self.quitButton = tk.Button(self.bottomFrame, text='Quit', command=self.root.destroy)
+                self.quitButton.pack(side=tk.RIGHT)
+                
+            def roll_the_dice(self) -> int:
+                rolled = random.randrange(1, 7)
+                self.dice_label_image.config(image=self.dice_images[rolled-1])  # Update the label with the dice image
+                return rolled
+
+            def get_a_guess(self):
+                rolled = self.roll_the_dice()
+                user_guess = self.entry_guess.get()
+                user_bet=safe_cast(self.entry_bet.get(),int,0)
+                if user_guess:
+                    self.entry_guess.delete(0, tk.END)
+                    self.entry_bet.delete(0, tk.END)
+                    if str(rolled) == user_guess:
+                        self.dice_label.config(text=f'Yor bet {user_bet}. Your guess was {user_guess}.\nYou rolled a {rolled}. You Won!', bg="green")
+                        self.update_balance(user_bet)
+                    else:
+                        self.dice_label.config(text=f'Yor bet {user_bet}. Your guess was {user_guess}.\nYou rolled a {rolled}. You Lose!', bg="red")
+                        self.update_balance(-user_bet)
+                else:
+                    self.dice_label.config(text='You need to guess and bet first', bg='yellow')
+             
+            def update_balance(self, user_bet):
+                self.balance_value+=user_bet
+                self.balance.config(text=self.balance_value)
+                        
+        
+        if __name__ == "__main__":
+            app = Application()
+
+
+    # Task1()
+    Task2()
+
 def Day10():
     def Task1():
         my_tuple=(1,2,3,4,5,6,7,8,'A')
