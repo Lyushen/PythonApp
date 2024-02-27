@@ -1,15 +1,9 @@
 import random 
 import pygame as pg
-import sqlite3
-import csv
-#import pyodbc
-#import mysql connector
+import sqlite3 #import mysql connector
+import csv #import pyodbc
 import contextlib
-from ExternalFuncs import ask_in_range
-from ExternalFuncs import ask_a_question
-from ExternalFuncs import style
-from ExternalFuncs import safe_cast
-from ExternalFuncs import Timer
+from ExternalFuncs import (ask_in_range,ask_a_question,style,safe_cast,Timer)
 import copy
 import tkinter as tk
 
@@ -28,9 +22,115 @@ def main():
     # Day8()
     # Day9()
     # Day10()
-    Day11()
+    #Day11()
+    Day12()
     print()
     timer.stop()
+ 
+def Day12():
+    class Dice_Gambler():
+        def __init__(self):
+            self.root = tk.Tk()
+            self.root.title("Dice Gambler")
+            self.root.geometry("500x370+700+300")  # Set the window geometry
+            self.balance_value=500
+            self.winrate_of_two=2
+            self.winrate_of_three=5
+            self.dice_images = [tk.PhotoImage(file='images\\'+f'dice_{i}.png') for i in range(1, 7)]  # Load dice images
+            self.createWidgets()
+            self.root.mainloop()  # Start the Tkinter event loop
+
+        def createWidgets(self):
+            # Using grid layout for precise placement
+            self.root.grid_columnconfigure(0, weight=1)  # Configure the column 0 to expand with the window
+            self.root.grid_columnconfigure(1, weight=1)  # Configure the column 1 to expand with the window
+            self.root.grid_columnconfigure(2, weight=1)  # Configure the column 2 to expand with the window
+            
+            # Label for the dice game title, spanning two columns
+            self.dice_label = tk.Label(self.root, text=f'Welcome to Dice Gamles.\nFree credit +{self.balance_value}. Enjoy the game!', font=('Arial', 12))
+            self.dice_label.grid(row=0, columnspan=3, padx=5, pady=5, sticky='ew')  # 'ew' = east+west
+            
+            # Label and Entry for the user's bet
+            self.bet_label = tk.Label(self.root, text="Your bet:", font=('Arial', 12))
+            self.bet_label.grid(row=2, column=0, padx=5, pady=5, sticky='e')
+            self.entry_bet = tk.Entry(self.root, font=('Arial', 12))
+            self.entry_bet.grid(row=2, column=1, padx=5, pady=5, sticky='w')
+            
+            # Button to roll the dice
+            self.dice_button = tk.Button(self.root, text="Roll the dice", padx=10, pady=5, command=self.calculate, font=('Arial', 12))
+            self.dice_button.grid(row=3, columnspan=3, padx=5, pady=5, sticky='ew')
+            
+            # Labels for displaying the dice images, centered below the button
+            self.dice_label_image1 = tk.Label(self.root)
+            self.dice_label_image1.grid(row=4, column=0, padx=10, pady=10, sticky='ew')
+            self.dice_label_image2 = tk.Label(self.root)# Label 2
+            self.dice_label_image2.grid(row=4, column=1, columnspan=1, padx=10, pady=10, sticky='ew')
+            self.dice_label_image3 = tk.Label(self.root)# Label 3
+            self.dice_label_image3.grid(row=4, column=2, padx=10, pady=10, sticky='ew')
+            
+            # Lable for Balance and Balance
+            self.balance_lable=tk.Label(self.root, text="Balance: ", font=('Arial', 12))
+            self.balance_lable.grid(row=5,column=0, columnspan=2, padx=10, pady=10, sticky='n')
+            self.balance=tk.Label(self.root, text=self.balance_value, font=('Arial', 14),relief='groove', borderwidth=1)
+            self.balance.grid(row=5,column=1, columnspan=2, padx=10, pady=10, sticky='n')
+            
+            # Frame for the quit button, at the bottom right
+            self.bottomFrame = tk.Frame(self.root)
+            self.bottomFrame.grid(row=6, column=2, sticky='e', padx=10, pady=10)
+            
+            # Button to quit the application
+            self.quitButton = tk.Button(self.bottomFrame, text='Quit', command=self.root.destroy)
+            self.quitButton.pack(side=tk.RIGHT)
+        
+
+        def roll_dices(self) -> int:
+            rolled=[]
+            for i in range(1,4):
+                rolled_value=random.randrange(1, 7)
+                rolled.append(rolled_value)
+                label_attr_name = f"dice_label_image{i}"
+                label_widget = getattr(self, label_attr_name)
+                self.roll_dice_animation(label_widget, rolled_value, 50, 10)
+            return rolled
+        def roll_dice_animation(self, label_widget, rolled_value, speed, step):
+            if speed <= 1000: 
+                label_widget.config(image=self.dice_images[rolled_value - 1]) # Display the final dice image
+            else:
+                # Display a random dice image to simulate rolling
+                random_value = random.randrange(1, 7)
+                label_widget.config(image=self.dice_images[random_value - 1])
+                # Schedule the next update with increased delay
+                self.root.after(speed, lambda: self.roll_dice_animation(label_widget, rolled_value, speed + step, step))    
+        def calculate(self):
+            user_bet=self.entry_bet.get()
+            if user_bet: # Gamble logic
+                user_bet_int=safe_cast(user_bet,int,0)
+                if self.balance_value-user_bet_int<0:
+                    self.dice_label.config(text='You don\'t have enough money to bet', bg='#ff9696')
+                    return
+                rolled = self.roll_dices()
+                if rolled[0] == rolled[1] == rolled[2]:
+                    win_bet=user_bet_int*self.winrate_of_three
+                    self.update_balance(win_bet)
+                    self.dice_label.config(text=f'Your bet {user_bet_int}. You Won {win_bet}!', bg="#95ccff")
+                elif rolled[0] == rolled[1] or rolled[0] == rolled[2] or rolled[1] == rolled[2]:
+                    win_bet=user_bet_int*self.winrate_of_two
+                    self.update_balance(win_bet)
+                    self.dice_label.config(text=f'Your bet {user_bet_int}. You Won {win_bet}!', bg="#9bff96")
+                else:
+                    self.update_balance(-user_bet_int)
+                    self.dice_label.config(text=f'Your bet {user_bet_int}. You Lost {user_bet}!', bg="#ff9696")
+            else:
+                self.dice_label.config(text='You need to bet first', bg='#fffd96')
+            
+        def update_balance(self, user_bet):
+            self.balance_value+=user_bet
+            self.balance.config(text=self.balance_value)
+                    
+    
+    if __name__ == "__main__":
+        Dice_Gambler()
+ 
  
 def Day11():
     def Task1():
@@ -93,14 +193,15 @@ def Day11():
         my_label.bind("<Enter>", on_enter)
         my_label.bind("<Leave>", on_leave)
         root.mainloop()
-
+        
     def Task2():
-        class Application():
+        class GUI_Bet_and_Dice():
             def __init__(self):
                 self.root = tk.Tk()
                 self.root.title("Dice Roller")
-                self.root.geometry("400x370")  # Set the window geometry
+                self.root.geometry("400x370+700+300")  # Set the window geometry
                 self.balance_value=500
+                self.winrate=5
                 self.dice_images = [tk.PhotoImage(file='images\\'+f'dice_{i}.png') for i in range(1, 7)]  # Load dice images
                 self.createWidgets()
                 self.root.mainloop()  # Start the Tkinter event loop
@@ -156,16 +257,18 @@ def Day11():
             def get_a_guess(self):
                 rolled = self.roll_the_dice()
                 user_guess = self.entry_guess.get()
-                user_bet=safe_cast(self.entry_bet.get(),int,0)
-                if user_guess:
+                user_bet=self.entry_bet.get()
+                if user_guess and user_bet:
+                    user_bet_int=safe_cast(user_bet,int,0)
+                    win_bet=user_bet_int*self.winrate
                     self.entry_guess.delete(0, tk.END)
-                    self.entry_bet.delete(0, tk.END)
+                    # self.entry_bet.delete(0, tk.END) # don't clear the bet value
                     if str(rolled) == user_guess:
-                        self.dice_label.config(text=f'Yor bet {user_bet}. Your guess was {user_guess}.\nYou rolled a {rolled}. You Won!', bg="green")
-                        self.update_balance(user_bet)
+                        self.dice_label.config(text=f'Your bet {user_bet_int}. The guess was {user_guess}.\nYou rolled a {rolled}. You Won {win_bet}!', bg="green")
+                        self.update_balance(win_bet)
                     else:
-                        self.dice_label.config(text=f'Yor bet {user_bet}. Your guess was {user_guess}.\nYou rolled a {rolled}. You Lose!', bg="red")
-                        self.update_balance(-user_bet)
+                        self.dice_label.config(text=f'Your bet {user_bet_int}. The guess was {user_guess}.\nYou rolled a {rolled}. You Lost {user_bet}!', bg="red")
+                        self.update_balance(-user_bet_int)
                 else:
                     self.dice_label.config(text='You need to guess and bet first', bg='yellow')
              
@@ -175,7 +278,7 @@ def Day11():
                         
         
         if __name__ == "__main__":
-            app = Application()
+            GUI_Bet_and_Dice()
 
 
     # Task1()
