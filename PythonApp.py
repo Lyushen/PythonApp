@@ -28,18 +28,27 @@ def main():
     timer.stop()
  
 def Day12():
+
     class Dice_Gambler():
         def __init__(self):
             self.root = tk.Tk()
             self.root.title("Dice Gambler")
             self.root.geometry("500x370+700+300")  # Set the window geometry
+            self.__dice_images = self.__create_images() # Creating in the method to avoid 
             self.balance_value=500
             self.winrate_of_two=2
             self.winrate_of_three=5
-            self.dice_images = [tk.PhotoImage(file='images\\'+f'dice_{i}.png') for i in range(1, 7)]  # Load dice images
             self.createWidgets()
             self.root.mainloop()  # Start the Tkinter event loop
-
+        
+        @staticmethod
+        def __create_images():
+            try:
+                return [tk.PhotoImage(file='images\\'+f'dice_{i}.png') for i in range(1, 7)]  # Load dice images
+            except Exception as ex:
+                print(f"Error in reading the images: {ex}")
+                return None
+            
         def createWidgets(self):
             # Using grid layout for precise placement
             self.root.grid_columnconfigure(0, weight=1)  # Configure the column 0 to expand with the window
@@ -81,7 +90,6 @@ def Day12():
             # Button to quit the application
             self.quitButton = tk.Button(self.bottomFrame, text='Quit', command=self.root.destroy)
             self.quitButton.pack(side=tk.RIGHT)
-        
 
         def roll_dices(self) -> int:
             rolled=[]
@@ -90,15 +98,16 @@ def Day12():
                 rolled.append(rolled_value)
                 label_attr_name = f"dice_label_image{i}"
                 label_widget = getattr(self, label_attr_name)
-                self.roll_dice_animation(label_widget, rolled_value, 50, 10)
+                # self.roll_dice_animation(label_widget, rolled_value, 50, 10) # Disable animation
+                label_widget.config(image=self.__dice_images[rolled_value - 1])
             return rolled
         def roll_dice_animation(self, label_widget, rolled_value, speed, step):
             if speed <= 1000: 
-                label_widget.config(image=self.dice_images[rolled_value - 1]) # Display the final dice image
+                label_widget.config(image=self.__dice_images[rolled_value - 1]) # Display the final dice image
             else:
                 # Display a random dice image to simulate rolling
                 random_value = random.randrange(1, 7)
-                label_widget.config(image=self.dice_images[random_value - 1])
+                label_widget.config(image=self.__dice_images[random_value - 1])
                 # Schedule the next update with increased delay
                 self.root.after(speed, lambda: self.roll_dice_animation(label_widget, rolled_value, speed + step, step))    
         def calculate(self):
@@ -122,15 +131,14 @@ def Day12():
                     self.dice_label.config(text=f'Your bet {user_bet_int}. You Lost {user_bet}!', bg="#ff9696")
             else:
                 self.dice_label.config(text='You need to bet first', bg='#fffd96')
-            
+
         def update_balance(self, user_bet):
             self.balance_value+=user_bet
-            self.balance.config(text=self.balance_value)
-                    
+            self.balance.config(text=self.balance_value)  
+
     
     if __name__ == "__main__":
         Dice_Gambler()
- 
  
 def Day11():
     def Task1():
