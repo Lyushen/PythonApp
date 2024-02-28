@@ -12,37 +12,206 @@ def main():
     EURO='€'
     timer=Timer(1)
     timer.start()
-    #Day2()
-    #Day3()
-    #Day4()
-    #Day5()
-    #Day6()
-    #Day7()
+    # Day2()
+    # Day3()
+    # Day4()
+    # Day5()
+    # Day6()
+    # Day7()
     # Day71()
     # Day8()
     # Day9()
     # Day10()
-    #Day11()
+    # Day11()
     Day12()
+    # Day13()
     print()
     timer.stop()
  
+def Day13():
+    def Task2():
+        pass
+    
+    def Task1(): #converting my app into proper OOP objects
+        class Game_Manager:
+            pass
+        class Player(Game_Manager):
+            def __init__(self) -> None:
+                super().__init__()
+                self._balance_value=500.00
+        
+        
+        class Dice_Gambler(Game_Manager):
+            def __init__(self,root:tk.Tk) -> tk.Tk:
+                self.root = root
+                self.root.title("Dice Gambler")
+                self.root.geometry("500x370+700+300")  # Set the window geometry
+                self.__dice_images = self.__create_images() # Creating in the method to avoid 
+                self._winrate_of_two=2.0
+                self._winrate_of_three=5.0
+                self.createWidgets()
+                # self.root.mainloop()  # Start the Tkinter event loop
+            
+            
+            @property
+            def winrate_of_two(self) -> float:
+                return self._winrate_of_two
+
+            @winrate_of_two.setter
+            def winrate_of_two(self, value: float):
+                if value < 1.0:
+                    #raise ValueError("Winrate cannot be less than 1.0") # Print an error message instead of raising an exception
+                    print(f"Error: Winrate cannot be less than 1.0. Keeping the previous value {self._winrate_of_two}.")
+                else:
+                    self._winrate_of_two = value
+            
+            @staticmethod
+            def __create_images() -> list:
+                try:
+                    return [tk.PhotoImage(file='images\\'+f'dice_{i}.png') for i in range(1, 7)]  # Load dice images
+                except Exception as ex:
+                    print(f"Error in reading the images: {ex}")
+                    return None
+                
+            def createWidgets(self):
+                # Using grid layout for precise placement
+                self.root.grid_columnconfigure(0, weight=1)  # Configure the column 0 to expand with the window
+                self.root.grid_columnconfigure(1, weight=1)  # Configure the column 1 to expand with the window
+                self.root.grid_columnconfigure(2, weight=1)  # Configure the column 2 to expand with the window
+                
+                # Label for the dice game title, spanning two columns
+                self.dice_label = tk.Label(self.root, text=f'Welcome to Dice Gamles.\nFree credit +{self.get_balance()}. Enjoy the game!', font=('Arial', 12))
+                self.dice_label.grid(row=0, columnspan=3, padx=5, pady=5, sticky='ew')  # 'ew' = east+west
+                
+                # Label and Entry for the user's bet
+                self.bet_label = tk.Label(self.root, text="Your bet:", font=('Arial', 12))
+                self.bet_label.grid(row=2, column=0, padx=5, pady=5, sticky='e')
+                self.entry_bet = tk.Entry(self.root, font=('Arial', 12))
+                self.entry_bet.grid(row=2, column=1, padx=5, pady=5, sticky='w')
+                
+                # Button to roll the dice
+                self.dice_button = tk.Button(self.root, text="Roll the dice", padx=10, pady=5, command=self.calculate, font=('Arial', 12))
+                self.dice_button.grid(row=3, columnspan=3, padx=5, pady=5, sticky='ew')
+                
+                # Labels for displaying the dice images, centered below the button
+                self.dice_label_image1 = tk.Label(self.root)
+                self.dice_label_image1.grid(row=4, column=0, padx=10, pady=10, sticky='ew')
+                self.dice_label_image2 = tk.Label(self.root)# Label 2
+                self.dice_label_image2.grid(row=4, column=1, columnspan=1, padx=10, pady=10, sticky='ew')
+                self.dice_label_image3 = tk.Label(self.root)# Label 3
+                self.dice_label_image3.grid(row=4, column=2, padx=10, pady=10, sticky='ew')
+                
+                # Lable for Balance and Balance
+                self.balance_lable=tk.Label(self.root, text="Balance: ", font=('Arial', 12))
+                self.balance_lable.grid(row=5,column=0, columnspan=2, padx=10, pady=10, sticky='n')
+                self.balance=tk.Label(self.root, text=self.get_balance(), font=('Arial', 14),relief='groove', borderwidth=1)
+                self.balance.grid(row=5,column=1, columnspan=2, padx=10, pady=10, sticky='n')
+                
+                # Frame for the quit button, at the bottom right
+                self.bottomFrame = tk.Frame(self.root)
+                self.bottomFrame.grid(row=6, column=2, sticky='e', padx=10, pady=10)
+                
+                # Button to quit the application
+                self.quitButton = tk.Button(self.bottomFrame, text='Quit', command=self.root.destroy)
+                self.quitButton.pack(side=tk.RIGHT)
+            
+            def get_balance(self) -> float:
+                return round(self._balance_value,2)
+
+            def roll_dices(self) -> int:
+                rolled=[]
+                for i in range(1,4):
+                    rolled_value=random.randrange(1, 7)
+                    rolled.append(rolled_value)
+                    label_attr_name = f"dice_label_image{i}"
+                    label_widget = getattr(self, label_attr_name)
+                    # self.roll_dice_animation(label_widget, rolled_value, 50, 10) # Disable animation
+                    label_widget.config(image=self.__dice_images[rolled_value - 1])
+                return rolled
+            def roll_dice_animation(self, label_widget, rolled_value, speed, step):
+                if speed <= 1000: 
+                    label_widget.config(image=self.__dice_images[rolled_value - 1]) # Display the final dice image
+                else:
+                    # Display a random dice image to simulate rolling
+                    random_value = random.randrange(1, 7)
+                    label_widget.config(image=self.__dice_images[random_value - 1])
+                    # Schedule the next update with increased delay
+                    self.root.after(speed, lambda: self.roll_dice_animation(label_widget, rolled_value, speed + step, step))    
+            def calculate(self):
+                user_bet=self.entry_bet.get()
+                if user_bet: # Gamble logic
+                    user_bet_float=round(safe_cast(user_bet,float,0),2)
+                    if self.get_balance()-user_bet_float<0:
+                        self.dice_label.config(text='You don\'t have enough money to bet', bg='#ff9696')
+                        return
+                    rolled = self.roll_dices()
+                    if rolled[0] == rolled[1] == rolled[2]:
+                        win_bet:float=user_bet_float*self._winrate_of_three
+                        self.update_balance(win_bet)
+                        self.dice_label.config(text=f'Your bet {user_bet_float}. You Won {win_bet}!', bg="#95ccff")
+                    elif rolled[0] == rolled[1] or rolled[0] == rolled[2] or rolled[1] == rolled[2]:
+                        win_bet:float=user_bet_float*self.winrate_of_two
+                        self.update_balance(win_bet)
+                        self.dice_label.config(text=f'Your bet {user_bet_float}. You Won {win_bet}!', bg="#9bff96")
+                    else:
+                        self.update_balance(-user_bet_float)
+                        self.dice_label.config(text=f'Your bet {user_bet_float}. You Lost {user_bet_float}!', bg="#ff9696")
+                else:
+                    self.dice_label.config(text='You need to bet first', bg='#fffd96')
+
+            def update_balance(self, user_bet):
+                balance=self._balance_value
+                balance+=user_bet
+                self._balance_value=balance
+                balance=round(balance,2)
+                self.balance.config(text=balance)
+
+        
+        if __name__ == "__main__":
+            root=tk.Tk()
+            app=Dice_Gambler(root)
+            app.winrate_of_two=1.2 # Property
+            
+            # Dice_Gambler()
+            print(app.winrate_of_two) # property
+            print(app._winrate_of_two) # attribute
+            app.root.mainloop()
+
+    # Task1()
+    Task2()
+
 def Day12():
 
+
+    # class Player:
+    # class Game_Manager:
     class Dice_Gambler():
-        def __init__(self):
-            self.root = tk.Tk()
+        def __init__(self,root:tk.Tk) -> tk.Tk:
+            self.root = root
             self.root.title("Dice Gambler")
             self.root.geometry("500x370+700+300")  # Set the window geometry
             self.__dice_images = self.__create_images() # Creating in the method to avoid 
-            self.balance_value=500
-            self.winrate_of_two=2
-            self.winrate_of_three=5
+            self._balance_value=500.00
+            self._winrate_of_two=2.0
+            self._winrate_of_three=5.0
             self.createWidgets()
-            self.root.mainloop()  # Start the Tkinter event loop
+            # self.root.mainloop()  # Start the Tkinter event loop
+        
+        
+        @property
+        def winrate_of_two(self) -> float:
+            return self._winrate_of_two
+
+        @winrate_of_two.setter
+        def winrate_of_two(self, value: float):
+            if value < 1.0:
+                #raise ValueError("Winrate cannot be less than 1.0") # Print an error message instead of raising an exception
+                print(f"Error: Winrate cannot be less than 1.0. Keeping the previous value {self._winrate_of_two}.")
+            else:
+                self._winrate_of_two = value
         
         @staticmethod
-        def __create_images():
+        def __create_images() -> list:
             try:
                 return [tk.PhotoImage(file='images\\'+f'dice_{i}.png') for i in range(1, 7)]  # Load dice images
             except Exception as ex:
@@ -56,7 +225,7 @@ def Day12():
             self.root.grid_columnconfigure(2, weight=1)  # Configure the column 2 to expand with the window
             
             # Label for the dice game title, spanning two columns
-            self.dice_label = tk.Label(self.root, text=f'Welcome to Dice Gamles.\nFree credit +{self.balance_value}. Enjoy the game!', font=('Arial', 12))
+            self.dice_label = tk.Label(self.root, text=f'Welcome to Dice Gamles.\nFree credit +{self.get_balance()}. Enjoy the game!', font=('Arial', 12))
             self.dice_label.grid(row=0, columnspan=3, padx=5, pady=5, sticky='ew')  # 'ew' = east+west
             
             # Label and Entry for the user's bet
@@ -80,7 +249,7 @@ def Day12():
             # Lable for Balance and Balance
             self.balance_lable=tk.Label(self.root, text="Balance: ", font=('Arial', 12))
             self.balance_lable.grid(row=5,column=0, columnspan=2, padx=10, pady=10, sticky='n')
-            self.balance=tk.Label(self.root, text=self.balance_value, font=('Arial', 14),relief='groove', borderwidth=1)
+            self.balance=tk.Label(self.root, text=self.get_balance(), font=('Arial', 14),relief='groove', borderwidth=1)
             self.balance.grid(row=5,column=1, columnspan=2, padx=10, pady=10, sticky='n')
             
             # Frame for the quit button, at the bottom right
@@ -90,6 +259,9 @@ def Day12():
             # Button to quit the application
             self.quitButton = tk.Button(self.bottomFrame, text='Quit', command=self.root.destroy)
             self.quitButton.pack(side=tk.RIGHT)
+        
+        def get_balance(self) -> float:
+            return round(self._balance_value,2)
 
         def roll_dices(self) -> int:
             rolled=[]
@@ -113,32 +285,42 @@ def Day12():
         def calculate(self):
             user_bet=self.entry_bet.get()
             if user_bet: # Gamble logic
-                user_bet_int=safe_cast(user_bet,int,0)
-                if self.balance_value-user_bet_int<0:
+                user_bet_float=round(safe_cast(user_bet,float,0),2)
+                if self.get_balance()-user_bet_float<0:
                     self.dice_label.config(text='You don\'t have enough money to bet', bg='#ff9696')
                     return
                 rolled = self.roll_dices()
                 if rolled[0] == rolled[1] == rolled[2]:
-                    win_bet=user_bet_int*self.winrate_of_three
+                    win_bet:float=user_bet_float*self._winrate_of_three
                     self.update_balance(win_bet)
-                    self.dice_label.config(text=f'Your bet {user_bet_int}. You Won {win_bet}!', bg="#95ccff")
+                    self.dice_label.config(text=f'Your bet {user_bet_float}. You Won {win_bet}!', bg="#95ccff")
                 elif rolled[0] == rolled[1] or rolled[0] == rolled[2] or rolled[1] == rolled[2]:
-                    win_bet=user_bet_int*self.winrate_of_two
+                    win_bet:float=user_bet_float*self.winrate_of_two
                     self.update_balance(win_bet)
-                    self.dice_label.config(text=f'Your bet {user_bet_int}. You Won {win_bet}!', bg="#9bff96")
+                    self.dice_label.config(text=f'Your bet {user_bet_float}. You Won {win_bet}!', bg="#9bff96")
                 else:
-                    self.update_balance(-user_bet_int)
-                    self.dice_label.config(text=f'Your bet {user_bet_int}. You Lost {user_bet}!', bg="#ff9696")
+                    self.update_balance(-user_bet_float)
+                    self.dice_label.config(text=f'Your bet {user_bet_float}. You Lost {user_bet_float}!', bg="#ff9696")
             else:
                 self.dice_label.config(text='You need to bet first', bg='#fffd96')
 
         def update_balance(self, user_bet):
-            self.balance_value+=user_bet
-            self.balance.config(text=self.balance_value)  
+            balance=self._balance_value
+            balance+=user_bet
+            self._balance_value=balance
+            balance=round(balance,2)
+            self.balance.config(text=balance)
 
     
     if __name__ == "__main__":
-        Dice_Gambler()
+        root=tk.Tk()
+        app=Dice_Gambler(root)
+        app.winrate_of_two=1.2 # Property
+        
+        # Dice_Gambler()
+        print(app.winrate_of_two) # property
+        print(app._winrate_of_two) # attribute
+        app.root.mainloop()
  
 def Day11():
     def Task1():

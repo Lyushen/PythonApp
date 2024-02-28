@@ -1,0 +1,193 @@
+<mxfile host="app.diagrams.net" modified="2024-02-28T12:47:46.075Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36" etag="laexQD6mlk4-wTwYndXT" version="23.1.7" type="device">
+  <diagram name="Page-1" id="gcP6atNEDORR3qKgy9Ab">
+    <mxGraphModel dx="1434" dy="1949" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="5kuEk_3HOophXWp1ichP-1" value="" style="whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="140" y="410" width="980" height="590" as="geometry" />
+        </mxCell>
+        <mxCell id="5kuEk_3HOophXWp1ichP-2" value="" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="160" y="480" width="460" height="470" as="geometry" />
+        </mxCell>
+        <mxCell id="5kuEk_3HOophXWp1ichP-3" value="" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="640" y="480" width="460" height="470" as="geometry" />
+        </mxCell>
+        <mxCell id="5kuEk_3HOophXWp1ichP-5" value="Banking Application GUI" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="455" y="430" width="350" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="5kuEk_3HOophXWp1ichP-6" value="Current Account {current_account_number}" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="215" y="500" width="350" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="5kuEk_3HOophXWp1ichP-7" value="Savings Account {savings_account_number}" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="695" y="490" width="350" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="5kuEk_3HOophXWp1ichP-9" value="Quit" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="1010" y="960" width="90" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="5kuEk_3HOophXWp1ichP-10" value="Status Bar: Some log information (example: [red] withdrawing from the Saving Account is not possible, your balance could not be below 0)" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="160" y="960" width="830" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="5kuEk_3HOophXWp1ichP-13" value="Your balance:" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="233.75" y="545" width="140" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="5kuEk_3HOophXWp1ichP-14" value="€500" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;fontSize=16;" vertex="1" parent="1">
+          <mxGeometry x="393.75" y="545" width="140" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="5kuEk_3HOophXWp1ichP-16" value="deposit_input_box" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" vertex="1" parent="1">
+          <mxGeometry x="297.5" y="660" width="200" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="5kuEk_3HOophXWp1ichP-17" value="Enter amount:" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="167.5" y="660" width="110" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="5kuEk_3HOophXWp1ichP-18" value="Deposit" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="517.5" y="660" width="95" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="5kuEk_3HOophXWp1ichP-19" value="withdraw_input_box" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" vertex="1" parent="1">
+          <mxGeometry x="297.5" y="820" width="200" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="5kuEk_3HOophXWp1ichP-20" value="Enter amount:" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="167.5" y="820" width="110" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="5kuEk_3HOophXWp1ichP-21" value="Withdraw" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="517.5" y="820" width="95" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="5kuEk_3HOophXWp1ichP-22" value="Transaction Fee for Depositing: {€0}" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="291.25" y="710" width="208.75" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="5kuEk_3HOophXWp1ichP-23" value="Transaction fee: {€1.50}" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="297.5" y="870" width="202.5" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="5kuEk_3HOophXWp1ichP-24" value="Depositing the account:" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="242.5" y="620" width="295" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="5kuEk_3HOophXWp1ichP-26" value="Withdrawing from the account:" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="246.25" y="780" width="287.5" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="5kuEk_3HOophXWp1ichP-28" value="Your balance:" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="730" y="530" width="125" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="5kuEk_3HOophXWp1ichP-29" value="€500" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;fontSize=16;" vertex="1" parent="1">
+          <mxGeometry x="870" y="530" width="150" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="5kuEk_3HOophXWp1ichP-30" value="deposit_input_box" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" vertex="1" parent="1">
+          <mxGeometry x="776.25" y="740" width="200" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="5kuEk_3HOophXWp1ichP-31" value="Enter amount:" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="646.25" y="740" width="110" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="5kuEk_3HOophXWp1ichP-32" value="Deposit" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="996.25" y="740" width="95" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="5kuEk_3HOophXWp1ichP-33" value="withdraw_input_box" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" vertex="1" parent="1">
+          <mxGeometry x="776.25" y="860" width="200" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="5kuEk_3HOophXWp1ichP-34" value="Enter amount:" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="646.25" y="860" width="110" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="5kuEk_3HOophXWp1ichP-35" value="Withdraw" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="996.25" y="860" width="95" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="5kuEk_3HOophXWp1ichP-36" value="Transaction Fee for Depositing: {€0}" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="778.13" y="790" width="198.75" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="5kuEk_3HOophXWp1ichP-37" value="Transaction fee: {€0}" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="776.25" y="910" width="202.5" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="5kuEk_3HOophXWp1ichP-38" value="Depositing the account:" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="721.25" y="700" width="295" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="5kuEk_3HOophXWp1ichP-39" value="Withdrawing from the account:" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="710" y="820" width="317.5" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="5kuEk_3HOophXWp1ichP-40" value="Current Interest Rate" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="722.5" y="620" width="132.5" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="5kuEk_3HOophXWp1ichP-41" value="2.5%" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" vertex="1" parent="1">
+          <mxGeometry x="880" y="620" width="137.5" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="5kuEk_3HOophXWp1ichP-42" value="€500*0.25%=€x" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" vertex="1" parent="1">
+          <mxGeometry x="880" y="660" width="137.5" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="5kuEk_3HOophXWp1ichP-43" value="Current Calculated Interest&amp;nbsp;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="722.5" y="660" width="132.5" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="5kuEk_3HOophXWp1ichP-44" value="Interest rate for the Saving Account:" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="711.25" y="580" width="317.5" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="5kuEk_3HOophXWp1ichP-45" value="{deposit_total}" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" vertex="1" parent="1">
+          <mxGeometry x="515" y="710" width="100" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="5kuEk_3HOophXWp1ichP-46" value="{withdraw_total}" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" vertex="1" parent="1">
+          <mxGeometry x="515" y="870" width="100" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="5kuEk_3HOophXWp1ichP-47" value="{deposit_total}" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" vertex="1" parent="1">
+          <mxGeometry x="993.75" y="790" width="100" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="5kuEk_3HOophXWp1ichP-48" value="{withdraw_total}" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" vertex="1" parent="1">
+          <mxGeometry x="993.75" y="910" width="100" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="5kuEk_3HOophXWp1ichP-50" value="" style="whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="140" y="-200" width="980" height="590" as="geometry" />
+        </mxCell>
+        <mxCell id="5kuEk_3HOophXWp1ichP-54" value="" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="160" y="-130" width="460" height="470" as="geometry" />
+        </mxCell>
+        <mxCell id="5kuEk_3HOophXWp1ichP-55" value="" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="640" y="-130" width="460" height="470" as="geometry" />
+        </mxCell>
+        <mxCell id="5kuEk_3HOophXWp1ichP-56" value="Banking Application GUI" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="455" y="-180" width="350" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="5kuEk_3HOophXWp1ichP-57" value="Current Account {current_account_number}" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="220.63" y="-120" width="350" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="5kuEk_3HOophXWp1ichP-58" value="Savings Account {savings_account_number}" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="695" y="-120" width="350" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="5kuEk_3HOophXWp1ichP-59" value="Quit" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="1010" y="350" width="90" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="5kuEk_3HOophXWp1ichP-60" value="Status Bar: Some log information (example: [red] withdrawing from the Saving Account is not possible, your balance could not be below 0)" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="160" y="350" width="830" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="5kuEk_3HOophXWp1ichP-15" value="The Current Account form doesn&#39;t visible until user presses this&lt;br style=&quot;border-color: var(--border-color);&quot;&gt;&quot;Open Current Account&quot; button" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="308.75" y="-80" width="191.25" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="5kuEk_3HOophXWp1ichP-27" value="The Saving Account form doesn&#39;t visible until user presses this&lt;br&gt;&quot;Open Savings Account&quot; button" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="779.38" y="-80" width="190" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="5kuEk_3HOophXWp1ichP-61" value="First Name:" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="220.63" y="10" width="170" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="5kuEk_3HOophXWp1ichP-62" value="Last Name:" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="220.63" y="50" width="170" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="5kuEk_3HOophXWp1ichP-63" value="first_name" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" vertex="1" parent="1">
+          <mxGeometry x="432.38" y="10" width="138.25" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="5kuEk_3HOophXWp1ichP-64" value="last_name" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" vertex="1" parent="1">
+          <mxGeometry x="432.38" y="50" width="138.25" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="5kuEk_3HOophXWp1ichP-65" value="Open Current Account" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="336.37" y="110" width="136" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="5kuEk_3HOophXWp1ichP-66" value="First Name:" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="699.38" y="10" width="170" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="5kuEk_3HOophXWp1ichP-67" value="Last Name:" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="699.38" y="50" width="170" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="5kuEk_3HOophXWp1ichP-68" value="first_name" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" vertex="1" parent="1">
+          <mxGeometry x="911.13" y="10" width="138.25" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="5kuEk_3HOophXWp1ichP-69" value="last_name" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" vertex="1" parent="1">
+          <mxGeometry x="911.13" y="50" width="138.25" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="5kuEk_3HOophXWp1ichP-70" value="Open Savings Account" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="815.12" y="110" width="136" height="30" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

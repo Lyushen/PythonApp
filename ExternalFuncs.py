@@ -1,4 +1,12 @@
 import time
+
+def safe_cast(value, to_type, default=None):
+    try:
+        return to_type(value)
+    except (ValueError, TypeError) as ex:
+        print(f'Error during convertation {ex}')
+        return default
+
 def extract_keys(products):
     result = {}
     used_keys = {}
@@ -145,8 +153,3 @@ class Timer:
         print(f"Function '{func.__name__}' executed in: {end_time - start_time:.4f} seconds")
         return result
     
-def safe_cast(value, to_type, default=None):
-    try:
-        return to_type(value)
-    except (ValueError, TypeError) as ex:
-        print(f'Error during convertation {ex}')
