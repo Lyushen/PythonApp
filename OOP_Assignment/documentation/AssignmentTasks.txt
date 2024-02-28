@@ -1,0 +1,41 @@
+Assignment Tasks - Scenario to be provided
+
+Task 1 – Understanding Object-Oriented Programming (20 Marks)
+
+A) Explain what the Object-Oriented Programming paradigm is and outline at least three benefits which make it advantageous for software development.
+
+B) Explain the concepts of abstraction and encapsulation in Object-Oriented Programming, outline how they contribute to creating well-structured and maintainable software systems.
+
+Task 2 – Designing an Object-Oriented Programming solution (30 Marks)
+Create a UML diagram for the design of a basic bank account. The design should account for two distinct types of accounts, savings accounts and current accounts. Current accounts will have set transaction fees which will apply to all withdrawals. Savings accounts will have a set interest rate which will be used to calculate interest for the account (balance * interest rate). Below is a breakdown of the attributes and functionality which should be represented by your class design.
+
+o Attributes: Account Number, Account Balance, Interest Rate (savings), Transaction Fee (current)
+
+o Functionality: Withdraw, Deposit, Check Balance, Calculate Interest (savings)
+
+The design should account for best practices and appropriate use of OOP design methodologies. 
+
+Task 3 – Implementing an Object-Oriented design (30 Marks)
+Using the Python programming language, write code to represent each of the classes designed in Task 2. Your code should be well-structured, adhere to appropriate coding conventions and clearly reflect the design.
+
+Task 4 – Understanding Test-Driven Development (20 Marks)
+
+A) Briefly explain the concept of test-driven development and outline the benefits it can have on the software development process.
+
+B) Based on the design from Task 2 and subsequent code created in Task 3, explain how unit testing could be implemented and create three unit tests to demonstrate their functionality.
+
+Guide and Scenario
+
+Task 1A & Task 1B
+
+Report of 500-750 words per section
+Give examples using code snippets and explanations
+Task 2
+Current Account - transaction fee = €1.50
+Saving Account - interest rate = 2.5%
+
+Use UML to show classes, with consideration to inheritance, what properties will be private, what properties can only be set using methods. Write a a brief description of each classes, how its derived, its properties and methods 
+
+Task 3
+Write a basic banking application based on your classes. This may have a console or a simple Tkinter GUI.
+Follow style conventions and ensure your code is well-commented
