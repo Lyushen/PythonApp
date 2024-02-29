@@ -37,5 +37,25 @@ Saving Account - interest rate = 2.5%
 Use UML to show classes, with consideration to inheritance, what properties will be private, what properties can only be set using methods. Write a a brief description of each classes, how its derived, its properties and methods 
 
 Task 3
-Write a basic banking application based on your classes. This may have a console or a simple Tkinter GUI.
+Implement the code for your classes 
 Follow style conventions and ensure your code is well-commented
+
+Task 4
+
+If not already done under Task 3, write a basic banking application based on your classes that will allow you to test the functionality of your classes. This may have a console or a simple Tkinter GUI.
+
+TDD
+
+Paragraph explaining what is meant by Test Driven Development approach.
+List and explain the TDD life cycle (3 phases)
+List and explain three key benefits to Test Driven Development
+Unit Testing
+
+Using the interface you create, details three unit test you will perform. 
+
+What feature / unit of your code  are you testing
+Describe what this unit of code should do
+What are you inputs
+What are your expected results
+What are your actual results - did it pass
+Perform the test code and screen shots of inputs and results

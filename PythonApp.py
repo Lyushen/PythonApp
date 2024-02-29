@@ -6,6 +6,8 @@ import contextlib
 from ExternalFuncs import (ask_in_range,ask_a_question,style,safe_cast,Timer)
 import copy
 import tkinter as tk
+import doctest
+from doctest import testmod
 
 def main():
     global EURO
@@ -23,11 +25,32 @@ def main():
     # Day9()
     # Day10()
     # Day11()
-    Day12()
+    # Day12()
     # Day13()
+    Day14()
     print()
     timer.stop()
- 
+
+def Day14():
+    
+    def calculate_area(length:int,width:int)->int:
+        """ _summary_
+        Args:
+            length (int): _description_
+            width (int): _description_
+        Returns:
+            int: _description_
+        Example:
+            >>> calculate_area(5,5)
+            25
+            >>> calculate_area(6,7)
+            42
+        """
+        return (length*width)
+    if __name__ == "__main__":
+        testmod()
+        print(calculate_area(5,6))
+
 def Day13():
     def Task2():
         pass
