@@ -4,13 +4,59 @@ import sys
 import subprocess
 import os
 
+class Accounts:
+    def __init__(self, account_number: str, first_name: str, last_name: str) -> None:
+        self.account_number = account_number
+        self.first_name = first_name
+        self.last_name = last_name
+        self._balance = 0.00
+    
+    def deposit(self, amount: float):
+        if amount > 0:
+            self._balance += amount
+            return True
+        return False
+
+    def withdraw(self, amount: float):
+        if amount > 0 and amount <= self._balance:
+            self._balance -= amount
+            return True
+        return False
+
+    def get_balance(self) -> float:
+        return self._balance
+
+class Current_Account(Accounts):
+    transaction_fee = 1.50
+
+    def __init__(self, account_number: str, first_name: str = "", last_name: str = "") -> None:
+        super().__init__(account_number, first_name, last_name)
+
+    def withdraw(self, amount: float):
+        if super().withdraw(amount + Current_Account.transaction_fee):
+            print(f"Withdrawal successful. Transaction fee of €{Current_Account.transaction_fee} applied.")
+            return True
+        return False
+
+class Savings_Account(Accounts):
+    interest_rate = 0.025
+
+    def __init__(self, account_number: str, first_name: str = "", last_name: str = "") -> None:
+        super().__init__(account_number, first_name, last_name)
+
+    def calculate_interest(self):
+        return self._balance * Savings_Account.interest_rate
+
 class Bank_Account_App:
     def __init__(self, accounts: dict) -> None:
         self._accounts = accounts if accounts is not None else {}
 
     def add_account(self, account):
         self._accounts[account.account_number] = account
-
+        
+    def get_account(self, account_number: str) -> Accounts:
+        return self._accounts.get(account_number, None)
+    
     def close_account(self, account_number):
         if account_number in self._accounts:
             del self._accounts[account_number]
@@ -21,7 +67,8 @@ class Bank_Account_App:
     def safe_cast(value, to_type, default=None):
         try:
             return to_type(value)
-        except (ValueError, TypeError):
+        except Exception as ex:
+            print(f'Error during convertation {ex}')
             return default
 
     def generate_account_number(self, account_type: str) -> str:
@@ -29,105 +76,115 @@ class Bank_Account_App:
             account_number = f"{'CA' if account_type == '1' else 'SA'}{random.randint(100, 999)}"
             if account_number not in self._accounts:
                 return account_number
-    
-    def safe_cast(value, to_type, default=None):
-        try:
-            return to_type(value)
-        except (ValueError, TypeError) as ex:
-            print(f'Error during convertation {ex}')
-            return default
 
+
+  
 class CLI_UI:
     def __init__(self, bank_app: Bank_Account_App) -> None:
         self.bank_app = bank_app
+        self.current_account = None
 
-    def ask_a_question(self, question: str, options: dict) -> str:
-        print(question)
-        for key, value in options.items():
-            print(f"{key}: {value}")
-        answer = input().upper()
-        return options.get(answer, None)
-    # def main_menu(self):
-    #     print('Welcome to the Banking Application.\n')
-    #     account_type = self.ask_a_question_in_numbers("Would you like to open a Current Account or Savings Account?", {"1": "Current Account", "2": "Savings Account"})
-    #     if account_type:
-    #         account_number = self.bank_app.generate_account_number(account_type)
-    #         if account_type == '1': #
-    #             account = Current_Account(account_number)
-    #         else:
-    #             account = Savings_Account(account_number)
-    #         self.bank_app.add_account(account)
-    #         print(f"Account {account_number} created successfully.")
-    #     else:
-    #         print("Invalid option selected.")
     def main_menu(self):
+        print("Welcome to the Banking Application.\n")
         while True:
-            print("Welcome to the Banking Application.\n")
-            choice = self.ask_a_question_in_numbers("Please chose an operation:", {"1": "Open Account", "2": "Perform Transactions"})
-            if choice == "1":
-                self.account_creation_menu()
-            elif choice == "2":
-                self.transaction_menu()
-            elif choice == "0":
-                print("Thank you for using the Banking Application.")
-                break
+            if not self.current_account:
+                choice = self.ask_a_question_in_numbers("[Main Menu] Please choose an operation:", {"1": "Open Account", "2": "Login", "3": "Exit"})
+                if choice == "1":
+                    self.account_creation_menu()
+                elif choice == "2":
+                    self.login_menu()
+                elif choice == "3":
+                    print("Thank you for using the Banking Application.")
+                    break
             else:
-                print("Invalid choice, please try again.")
+                self.transaction_menu()
 
     def account_creation_menu(self):
-        while True:
-            account_types={"1": "Current Account", "2": "Savings Account"}
-            account_type = self.ask_a_question_in_numbers("Do you want to open a Current Account or Savings Account?", account_types)
-            if account_type == "0":
-                break
-            first_name = input("Enter the Fisrt Name for the account: ")
-            last_name = input("Enter the Last Name for the account: ")
-            account_number = self.bank_app.generate_account_number(account_type)
-            if account_type == "1":
-                account = Current_Account(account_number, first_name, last_name)
-            elif account_type == "2":
-                account = Savings_Account(account_number, first_name, last_name)
-            else:
-                print("Invalid account type selected.")
-                continue
-            self.bank_app.add_account(account)
-            print(f"{account_types[account_type]} created successfully with account number: {account_number}")
-            
+        account_types = {"1": "Current Account", "2": "Savings Account"}
+        account_type = self.ask_a_question_in_numbers("Do you want to open a Current Account or Savings Account?", account_types)
+        if account_type not in account_types:
+            print("Returning to main menu.")
+            return
+        first_name = input(f"Enter the First Name for the {account_types[account_type]}: ")
+        last_name = input("Enter the Last Name: ")
+        account_number = self.bank_app.generate_account_number(account_type)
+        account = Current_Account(account_number, first_name, last_name) if account_type == "1" else Savings_Account(account_number, first_name, last_name)
+        self.bank_app.add_account(account)
+        self.current_account = account
+        print(f"{account_types[account_type]} created successfully with account number: {account_number}. Loggin in to the account.")
+        self.transaction_menu()
 
-    def transaction_menu(self):
-        while True:
-            transactions={"1": "Deposit", "2": "Withdraw", "3": "Check Balance", "3": "Calculate Interest (Savings Only)"}
-            choice = self.ask_a_question_in_numbers("Please, select one of following options:", transactions)
-            if choice == "0":
-                break
-            account_number = input("Enter your account number: ")
-            account = self.bank_app._accounts.get(account_number)
-            current_balance=account.get_balance()
-            if not account:
-                print("Account not found.")
-                continue
-            if choice == "1":
-                amount=self.ask_in_range("Enter the amount to deposit: ",[0.01,10000.00])
-                account.deposit(amount)
-                print(f"Deposited {amount}. New balance is {current_balance}.")
-            elif choice == "2":
-                # amount = self.ask_in_range("Enter the amount to withdraw: ",[0.01,10000.00])
-                min_withdraw=5
-                max_withdraw=current_balance if current_balance < 1000 else 1000
-                amount = self.ask_in_range(f"Please enter the amount to withdraw (between €{min_withdraw} and €{max_withdraw}):", [min_withdraw, max_withdraw])
-                account.withdraw(amount)
-                print(f"Withdrew {amount}. New balance is {current_balance}.")
-            elif choice == "3":
-                print(f"Current balance is {current_balance}.")
-            elif choice == "4" and isinstance(account, Savings_Account):
-                interest = account.calculate_interest()
-                print(f"Calculated interest: {interest}.")
-            else:
-                print("Invalid choice or operation not applicable to account type.")    
+    def login_menu(self):
+        account_number = input("Enter your account number to login: ")
+        account = self.bank_app.get_account(account_number)
+        if account:
+            self.current_account_number = account
+            print(f"Logged in successfully to account number: {account_number}.")
+        else:
+            print("Account not found. Please try again or open a new account.")
     
+    def transaction_menu(self):
+        if self.current_account:  # Check if the account object is stored
+            print(f'Logged in under {self.current_account.account_number}. Balance €{self.current_account.get_balance()}')
+        else:
+            print("No account is currently logged in.")
+        transactions = {"1": "Deposit", "2": "Withdraw", "3": "Check Balance", "4": "Calculate Interest (Savings Only)", "5": "Log Out"}
+        choice = self.ask_a_question_in_numbers("Please select an operation:", transactions)
+        if choice == "5":
+            self.current_account = None
+            self.self.account_link=None
+            print("Logged out successfully.")
+            return
+        if not self.current_account:
+            print("No account is currently logged in.")
+            return
+        self.perform_transaction(choice)
         
+    def perform_transaction(self, choice):
+        if choice == "1":
+            self.handle_deposit()
+        elif choice == "2":
+            self.handle_withdraw()
+        elif choice == "3":
+            print(f"Current balance is €{self.current_account.get_balance()}.")
+        elif choice == "4" and isinstance(self.current_account, Savings_Account):
+            interest = self.current_account.calculate_interest()
+            print(f"Calculated interest: €{interest}.")
+        else:
+            print("Invalid choice or operation not applicable to account type.")
+    
+    def handle_deposit(self):
+        max_deposit = 10000.00  # Maximum deposit amount per transaction
+        print("Deposit operation:")
+        try:
+            amount = self.ask_in_range("Enter the amount to deposit (max €10,000): ", [0.01, max_deposit], float)
+            self.current_account.deposit(amount)
+            print(f"Successfully deposited €{amount:.2f}. New balance is €{self.current_account.get_balance():.2f}.")
+        except ValueError as e:
+            print(f"An error occurred: {e}")
+            
+    def handle_withdraw(self):
+        min_withdraw = 5.00  # Minimum withdrawal amount
+        current_balance = self.current_account.get_balance()
+        transaction_fee = 1.50 if isinstance(self.current_account, Current_Account) else 0.00
+        max_withdraw = min(current_balance - transaction_fee, 1000.00)  # transaction fee if applicable
+        
+        if current_balance < min_withdraw + transaction_fee:
+            print("Your balance is too low for any withdrawals after considering the transaction fee.")
+            return
+
+        print("Withdrawal operation:")
+        if transaction_fee > 0:
+            print(f"A transaction fee of €{transaction_fee:.2f} will be applied to this withdrawal.")
+        try:
+            amount = self.ask_in_range(f"Enter the amount to withdraw (between €{min_withdraw} and €{max_withdraw}): ", [min_withdraw, max_withdraw], float)
+            # Assuming withdraw method updates the account balance, handles logic, and applies the transaction fee if necessary.
+            self.current_account.withdraw(amount + transaction_fee)  # Include transaction fee in the withdrawal amount for Current Accounts
+            print(f"Withdrew €{amount:.2f} with a transaction fee of €{transaction_fee:.2f}. New balance is €{self.current_account.get_balance():.2f}.")
+        except ValueError as e:
+            print(f"An error occurred: {e}")
+
     def ask_a_question_in_numbers(self,message,possible_answers={'1': 'Yes', '2': 'No'}):
-        possible_answers['0'] = 'Exit'
         options_list = [f"{key}. {value}" for key, value in possible_answers.items()]
         options_str = '\n'.join(options_list)
         full_message = f"{message} [{','.join(possible_answers.keys())}]\n{options_str}"
@@ -143,7 +200,6 @@ class CLI_UI:
                     return user_input
             else:
                 print(f"Incorrect input. Please enter one of the following options: [{','.join(possible_answers.keys())}]")
-    
     def ask_a_question(self,message, possible_answers={'Y': 'Yes', 'N': 'No'}):
         options_str = ', '.join([f"({key}) for {value}" for key, value in possible_answers.items()])
         full_message = f"{message} Possible answers are {options_str}."
@@ -161,8 +217,7 @@ class CLI_UI:
     @staticmethod
     def ask_in_range(text, range_limits=[1.0, 5.0], input_type=float):
         while True:
-            print(text)
-            var1 = input()
+            var1 = input(text + ' > ')
             try:
                 if input_type == int:
                     converted = int(var1)  # Convert to integer if input_type is int
@@ -176,9 +231,8 @@ class CLI_UI:
             except ValueError:
                 print(f"Invalid input: Please enter a valid {'integer' if input_type == int else 'number'}.")
 
-class TK_UI(Bank_Account_App): #button to open an account and a place holder
+class TK_UI:
     def __init__(self,root: tk.Tk, accounts: dict) -> tk.Tk:
-        super().__init__(accounts)
         self.root = root
         self.root.title("Banking Application")
         self.root.geometry("1000x600+450+250")  # Set the window geometry
@@ -395,50 +449,7 @@ class TK_UI(Bank_Account_App): #button to open an account and a place holder
     def get_withdraw_input_box(self) -> float:
         return 'float value of the widthraw'
 
-class Accounts:
-    def __init__(self, account_number: str, first_name: str, last_name: str) -> None:
-        self.account_number = account_number
-        self.first_name = first_name
-        self.last_name = last_name
-        self._balance = 0.00
-    
-    def deposit(self, amount: float):
-        if amount > 0:
-            self._balance += amount
-            return True
-        return False
 
-    def withdraw(self, amount: float):
-        if amount > 0 and amount <= self._balance:
-            self._balance -= amount
-            return True
-        return False
-
-    def get_balance(self) -> float:
-        return self._balance
-
-class Current_Account(Accounts):
-    transaction_fee = 1.50
-
-    def __init__(self, account_number: str, first_name: str = "", last_name: str = "") -> None:
-        super().__init__(account_number, first_name, last_name)
-
-    def withdraw(self, amount: float):
-        if super().withdraw(amount + Current_Account.transaction_fee):
-            print(f"Withdrawal successful. Transaction fee of €{Current_Account.transaction_fee} applied.")
-            return True
-        return False
-
-class Savings_Account(Accounts):
-    interest_rate = 0.025
-
-    def __init__(self, account_number: str, first_name: str = "", last_name: str = "") -> None:
-        super().__init__(account_number, first_name, last_name)
-
-    def calculate_interest(self):
-        return self._balance * Savings_Account.interest_rate
-
-        
 def main():
     if __name__ == "__main__":
         main_directory:str = os.path.dirname(os.path.abspath(__file__))
@@ -447,7 +458,6 @@ def main():
             launch_interface(mode)
         else:
             subprocess.call(["python", os.path.join(main_directory, "launcher.py")])
-            
 def launch_interface(mode):
     accounts = {}
     if mode == 'cli':
@@ -458,5 +468,4 @@ def launch_interface(mode):
         root=tk.Tk()
         app=TK_UI(root,accounts)
         app.root.mainloop()
-
 main()
