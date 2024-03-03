@@ -10,6 +10,7 @@ class Bank_Accounts:
         self.account_number = account_number
         self.first_name = first_name
         self.last_name = last_name
+        self.account_type=''
         self._balance = 0.00
     
     def deposit(self, amount: float) -> bool:
@@ -74,8 +75,9 @@ class Bank_Account_App:
             return default
 
     def generate_account_number(self, account_type: str) -> str:
+        account_type=account_type.lower()
         while True:
-            account_number = f"{'CA' if account_type == '1' else 'SA'}{random.randint(100, 999)}"
+            account_number = f"{'CA' if account_type == '1' or 'c' else 'SA'}{random.randint(100, 999)}"
             if account_number not in self._accounts:
                 return account_number
   
@@ -229,7 +231,9 @@ class CLI_UI:
                 print(f"Invalid input: Please enter a valid {'integer' if input_type == int else 'number'}.")
 
 class TK_UI:
-    def __init__(self,root: tk.Tk, accounts: dict) -> tk.Tk:
+    def __init__(self,root: tk.Tk,bank_app: Bank_Account_App) -> tk.Tk:
+        self.bank_app = bank_app
+        self.current_account = None
         self.root = root
         self.root.title("Banking Application")
         self.root.geometry("1000x600+450+250")  # Set the window geometry
@@ -321,7 +325,7 @@ class TK_UI:
         self.c_last_name_error_label = tk.Label(frame_var, text="Please enter last name",fg=self.left_frame_bg, bg=self.left_frame_bg)
         self.c_last_name_error_label.grid(row=4, column=1, sticky='ew', padx=5, pady=0, columnspan=2)
         # Confirmation Button
-        self.c_create_account_button = tk.Button(frame_var, text="Open Current Account", command=self.creating_current_account, font=('Arial', 12))
+        self.c_create_account_button = tk.Button(frame_var, text="Open Current Account", command=self.create_account('c'), font=('Arial', 12))
         self.c_create_account_button.grid(row=5, column=1, padx=5, pady=5, sticky='ew', columnspan=2)
         
         ## Savings Account Field
@@ -342,7 +346,7 @@ class TK_UI:
         self.s_last_name_error_label = tk.Label(frame_var, text="Please enter last name",fg=self.righ_frame_bg, bg=self.righ_frame_bg)
         self.s_last_name_error_label.grid(row=4, column=1, sticky='ew', padx=5, pady=0, columnspan=2)
         # Confirmation Button
-        self.s_create_account_button = tk.Button(frame_var, text="Open Savings Account", command=self.creating_savings_account, font=('Arial', 12))
+        self.s_create_account_button = tk.Button(frame_var, text="Open Savings Account", command=self.create_account('s'), font=('Arial', 12))
         self.s_create_account_button.grid(row=5, column=1, padx=5, pady=5, sticky='ew', columnspan=2)
     
     def destroy_initial_controls(self,is_ca:bool=True):
@@ -367,60 +371,117 @@ class TK_UI:
             pass
     
     def creating_current_account(self):
-        # Accounts.first_name
-        if self.first_name=='' or self.last_name=='':
-            self.first_name=self.c_first_name_entry.get()
-            self.last_name=self.c_last_name_entry.get()
-        if self.first_name!='' and self.last_name!='':
-            self.update_status(f"Current Account for '{self.first_name} {self.last_name}' has been created")
-            self.left_title.config(text=f'Current Account for {self.first_name} {self.last_name}')
-            # print(f'Debug: {self.first_name} {self.last_name}')
+        first_name, last_name = '', ''
+        # Check if a current account already exists
+        if self.current_account:
+            first_name = self.current_account.first_name
+            last_name = self.current_account.last_name
+        else:
+            # Get the first and last name from input fields
+            first_name = self.c_first_name_entry.get()
+            last_name = self.c_last_name_entry.get()
+            # Validate that both first name and last name are provided
+            if first_name and last_name:
+                # Account creation logic
+                self.update_status(f"Current Account for '{first_name} {last_name}' has been created.")
+                account_number = self.bank_app.generate_account_number('c')
+                account = Current_Account(account_number, first_name, last_name)
+                self.bank_app.add_account(account)
+                self.current_account = account  # Assign the newly created account
+            else:
+                # Displaying error frames for missing name information
+                self.update_status("We couldn't register the Current Account for you, please enter the First and Last names correctly.", 'red')
+                self.c_first_name_error_label.config(fg=self.left_frame_bg)
+                self.c_last_name_error_label.config(fg=self.left_frame_bg)
+                if not first_name:
+                    self.c_first_name_error_label.config(fg='red')
+                if not last_name:
+                    self.c_last_name_error_label.config(fg='red')
+                return  # Exit the method if required data is missing
+        if self.current_account:
+            self.left_title.config(text=f"Current Account for '{self.current_account.first_name} {self.current_account.last_name}'. Account Number: {self.current_account.account_number}")
             self.destroy_initial_controls()
-            return
-
-        self.first_name=self.c_first_name_entry.get()
-        self.last_name=self.c_last_name_entry.get()
-
-        if self.first_name=="":
-            self.c_first_name_error_label.config(fg='red')
-            self.update_status("We couldn't register Current Account for you, please enter the First and Last names correctly",'red')
-        else:
-            self.c_first_name_error_label.config(fg=self.left_frame_bg)
-        
-        if self.last_name=="":
-            self.update_status("We couldn't register Current Account for you, please enter the First and Last names correctly",'red')
-            self.c_last_name_error_label.config(fg='red')
-        else:
-            self.c_last_name_error_label.config(fg=self.left_frame_bg)
-        
 
     def creating_savings_account(self):
-        # Accounts.first_name
-        if self.first_name=='' or self.last_name=='':
-            self.first_name=self.s_first_name_entry.get()
-            self.last_name=self.s_last_name_entry.get()
-        if self.first_name!='' and self.last_name!='':
-            self.update_status(f"Savings Account for '{self.first_name} {self.last_name}' has been created")
-            self.right_title.config(text=f"Savings Account for {self.first_name} {self.last_name}")
-            # print(f'Debug: {self.first_name} {self.last_name}')
-            self.destroy_initial_controls(False)
-            return
-        
-        if self.first_name=="":
-            self.s_first_name_error_label.config(fg='red')
-            self.update_status("We couldn't register Savings Account for you, please enter the First and Last names correctly",'red')
+        first_name, last_name = '', ''
+        # Check if a current account already exists
+        if self.current_account:
+            first_name = self.current_account.first_name
+            last_name = self.current_account.last_name
         else:
-            self.s_first_name_error_label.config(fg=self.left_frame_bg)
+            # Get the first and last name from input fields
+            first_name = self.s_first_name_entry.get()
+            last_name = self.s_last_name_entry.get()
+            # Validate that both first name and last name are provided
+            if first_name and last_name:
+                # Account creation logic
+                self.update_status(f"Current Account for '{first_name} {last_name}' has been created.")
+                account_number = self.bank_app.generate_account_number('s')
+                # Create a Current Account instance
+                account = Savings_Account(account_number, first_name, last_name)
+                self.bank_app.add_account(account)
+                self.current_account = account  # Assign the newly created account
+            else:
+                # Displaying error frames for missing name information
+                self.update_status("We couldn't register the Current Account for you, please enter the First and Last names correctly.", 'red')
+                self.s_first_name_error_label.config(fg=self.left_frame_bg)
+                self.s_last_name_error_label.config(fg=self.left_frame_bg)
+                if not first_name:
+                    self.s_first_name_error_label.config(fg='red')
+                if not last_name:
+                    self.s_last_name_error_label.config(fg='red')
+                return  # Exit the method if required data is missing
+        if self.current_account:
+            self.right_title.config(text=f"Current Account for '{self.current_account.first_name} {self.current_account.last_name}'. Account Number: {self.current_account.account_number}")
+            self.destroy_initial_controls()
+
+    def create_account(self, account_type):
+        # Initialize variables
+        first_name, last_name = '', ''
         
-        if self.last_name=="":
-            self.update_status("We couldn't register Savings Account for you, please enter the First and Last names correctly",'red')
-            self.s_last_name_error_label.config(fg='red')
+        # Determine the type of account to create and set appropriate variables
+        entry_fields = {
+            'c': (self.c_first_name_entry, self.c_last_name_entry, self.c_first_name_error_label, self.c_last_name_error_label, 'Current'),
+            's': (self.s_first_name_entry, self.s_last_name_entry, self.s_first_name_error_label, self.s_last_name_error_label, 'Savings')
+        }
+        first_name_entry, last_name_entry, first_name_error_label, last_name_error_label, account_type_str = entry_fields[account_type]
+        
+        # Check if the account of this type already exists
+        if self.current_account and self.current_account.account_type == account_type:
+            first_name = self.current_account.first_name
+            last_name = self.current_account.last_name
         else:
-            self.s_last_name_error_label.config(fg=self.left_frame_bg)
+            # Get the first and last name from input fields
+            first_name = first_name_entry.get()
+            last_name = last_name_entry.get()
+            
+            # Validate that both first name and last name are provided
+            if first_name and last_name:
+                # Account creation logic
+                self.update_status(f"{account_type_str} Account for '{first_name} {last_name}' has been created.")
+                account_number = self.bank_app.generate_account_number(account_type)
+                
+                # Create account based on type
+                if account_type == 'c':
+                    account = Current_Account(account_number, first_name, last_name)
+                else:  # 's'
+                    account = Savings_Account(account_number, first_name, last_name)
+                    
+                self.bank_app.add_account(account)
+                self.current_account = account  # Assign the newly created account
+            else:
+                # Display error messages for missing name information
+                self.update_status(f"We couldn't register the {account_type_str} Account for you, please enter the First and Last names correctly.", 'red')
+                first_name_error_label.config(fg='red')
+                last_name_error_label.config(fg='red')
+                return  # Exit the method if required data is missing
+        
+        # Update UI components based on the created account
+        if self.current_account:
+            title_label = self.left_title if account_type == 'c' else self.right_title
+            title_label.config(text=f"{account_type_str} Account for '{self.current_account.first_name} {self.current_account.last_name}'. Account Number: {self.current_account.account_number}")
+            self.destroy_initial_controls()
 
-    
-
-    
     def create_current_account_controls():
         
         #generate new one
@@ -457,14 +518,14 @@ def main():
 def interface_launcher(mode):
     main_directory:str = os.path.dirname(os.path.abspath(__file__))
     accounts = {}
+    bank_app = Bank_Account_App(accounts)
     if mode == 'cli':
-        bank_app = Bank_Account_App(accounts)
         cli_ui = CLI_UI(bank_app)
         cli_ui.main_menu()
     elif mode == 'gui':
         print("Launched [GUI] Graphical User Interface, please consider it is under development. If window didn't show up, please, check background opened windows (taskbar), should be there.")
         root=tk.Tk()
-        app=TK_UI(root,accounts)
+        app=TK_UI(root,bank_app)
         app.root.mainloop()
     subprocess.call(["python", os.path.join(main_directory, "launcher.py")])
 main()
