@@ -29,7 +29,7 @@ def main():
     # Day12()
     # Day13()
     # Day14()
-    Day15()
+    # Day15()
     print()
     timer.stop()
 
@@ -65,7 +65,7 @@ def Day15(): #Event driven programming
         print(input("Please enter something\n"))
     
     def task3():
-        class GameScreen:
+        class GameScreen: # Tutor's template for a car race game
             def __init__ (self, root : tk.Tk):
                 self.root = root
                 root.title("Simple Game")
@@ -130,26 +130,26 @@ def Day15(): #Event driven programming
         # task2()
         task3()
     
-
 def Day14():
     
-    def calculate_area(length:int,width:int)->int:
-        """ _summary_
+    def calculate_area(length: int, width: int) -> int:
+        """_summary_
         Args:
             length (int): _description_
             width (int): _description_
         Returns:
-            int: _description_
+            int: The area of the rectangle.
         Example:
-            >>> calculate_area(5,5)
+            >>> calculate_area(5, 5)
             25
-            >>> calculate_area(6,7)
+            >>> calculate_area(6, 7)
             42
         """
-        return (length*width)
+        return length * width
+
     if __name__ == "__main__":
         testmod()
-        print(calculate_area(5,6))
+        print(calculate_area(5, 6))
 
 def Day13():
     def Task2():
