@@ -6,8 +6,9 @@ import contextlib
 from ExternalFuncs import (ask_in_range,ask_a_question,style,safe_cast,Timer)
 import copy
 import tkinter as tk
-import doctest
-from doctest import testmod
+from doctest import testmod #import doctest
+import time
+from threading import Thread# import threading
 
 def main():
     global EURO
@@ -27,9 +28,108 @@ def main():
     # Day11()
     # Day12()
     # Day13()
-    Day14()
+    # Day14()
+    Day15()
     print()
     timer.stop()
+
+def Day15(): #Event driven programming
+    
+    def task1():
+        def print_time(interval:int):
+            # while True:
+            for i in range(50):
+                print(time.strftime("In the zone %Z time is: %H:%M:%S" ))
+                time.sleep(interval)
+  
+        # print_time(1)
+        # print_time(0.1)
+        
+        thread_1=Thread(target=print_time,args=(1,),name="Thread One")
+        thread_2=Thread(target=print_time,args=(0.1,),name="Thread Two")
+        thread_1.start()
+        thread_2.start()
+        print("Are we there yet?")
+        
+    def task2():
+        def background_timer(interval:int):
+            while True:
+            # for i in range(50):
+                print(time.strftime("In the zone %Z time is: %H:%M:%S" ))
+                time.sleep(interval)
+                
+        bg_timer=Thread(target=background_timer,args=(1,),name="Thread One",daemon=True)
+        bg_timer.start()
+        
+        time.sleep(1)
+        print(input("Please enter something\n"))
+    
+    def task3():
+        class GameScreen:
+            def __init__ (self, root : tk.Tk):
+                self.root = root
+                root.title("Simple Game")
+                root.geometry("500x600")
+                # root.config(bg = "#0FFFFF")
+
+                #self.my_label = tk.Label()
+                #my_button = tk.Button()
+                self.x_position = 0
+                self.y_position = 0
+
+                self.direction = 1 #move to left
+                self.direction = 2 #move to the right
+
+                self.direction = 3 #Move down
+                self.direction = 4 # move up
+                self.direction = 2 #move to the right
+                self.create_controls()
+
+
+            def create_controls(self):
+                self.my_icon = tk.Label(self.root, text = "icon",
+                padx="0", pady="0", relief="ridge")
+                self.my_icon.config(fg="red", font=("Arial",10))
+                self.my_icon.place(x = self.x_position, y = self.y_position)
+                self.my_icon.after(100,self.move_icon)
+
+            def move_icon(self, distance : int = 10):
+                if self.direction == 1: # move left
+                    self.x_position -= distance
+                else:
+                    self.x_position += distance
+
+                self.my_icon.place(x = self.x_position, y = self.y_position)
+
+                self.set_next_direction()
+                self.my_icon.after (100, self.move_icon)
+                # def move_left(self, distance : int = 10):
+                # # move game icon left by specified distance
+                # pass
+                # def move_right (self, distance : int = 10):
+                # # move game icon right by specified distance
+                # self.x_position += distance
+                # self.my_icon.place(x = self.x_position, y = self.y_position)
+
+                # self.my_icon.after(500,self.move_right)
+
+            def set_next_direction(self):
+                if self.direction == 2:
+                    if self.x_position > 480:
+                        self.direction = 1 # move to the left
+                elif self.direction == 1:
+                    if self.x_position < 0:
+                        self.direction = 2 # move to the right
+
+        root = tk.Tk()
+        my_game = GameScreen(root)
+        my_game.root.mainloop()
+
+    if __name__=="__main__":
+        # task1()
+        # task2()
+        task3()
+    
 
 def Day14():
     

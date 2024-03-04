@@ -3,7 +3,6 @@ import random
 import sys
 import subprocess
 import os
-from io import StringIO
 
 class Bank_Accounts:
     def __init__(self, account_number: str, first_name: str, last_name: str) -> None:
@@ -42,7 +41,7 @@ class Current_Account(Bank_Accounts):
         return False
 
 class Savings_Account(Bank_Accounts):
-    interest_rate = 0.025
+    interest_rate = 0.025 # pre-set to 0.25%
 
     def __init__(self, account_number: str, first_name: str = "", last_name: str = "") -> None:
         super().__init__(account_number, first_name, last_name)
@@ -77,7 +76,7 @@ class Bank_Account_App:
     def generate_account_number(self, account_type: str) -> str:
         account_type=account_type.lower()
         while True:
-            account_number = f"{'CA' if account_type == '1' or 'c' else 'SA'}{random.randint(100, 999)}"
+            account_number = f"{'CA' if account_type == '1' or account_type == 'c' else 'SA'}{random.randint(100, 999)}"
             if account_number not in self._accounts:
                 return account_number
   
@@ -124,7 +123,7 @@ class CLI_UI:
         self.current_account = account # Loggin into account
         print(f"{account_types[account_type]} created successfully. Account number: '{account_number}'. Loggin into the account...")
         self.transaction_menu()
-
+        
     def login_menu(self):
         self.insert_spacing()
         account_number = input("Enter your account number to login: > ")
@@ -138,7 +137,7 @@ class CLI_UI:
     def transaction_menu(self):
         self.insert_spacing()
         if self.current_account:  # Check if the account object is stored
-            print(f"Hello '{self.current_account.first_name} {self.current_account.last_name}'. Logged in under '{self.current_account.account_number}'. Balance €{self.current_account.get_balance()}")
+            print(f"Hello '{self.current_account.first_name} {self.current_account.last_name}'. Logged in under '{self.current_account.account_number}'. Balance €{self.current_account.get_balance():.2f}")
         else:
             print("No account is currently logged in.")
         transactions = {"1": "Deposit", "2": "Withdraw", "3": "Check Balance", "4": "Calculate Interest (Savings Only)", "5": "Log Out"}
@@ -158,10 +157,10 @@ class CLI_UI:
         elif choice == "2":
             self.handle_withdraw()
         elif choice == "3":
-            print(f"Current balance is €{self.current_account.get_balance()}.")
+            print(f"Current balance is €{self.current_account.get_balance():.2f}.")
         elif choice == "4" and isinstance(self.current_account, Savings_Account):
             interest = self.current_account.calculate_interest()
-            print(f"Calculated interest: €{interest}.")
+            print(f"Calculated interest: €{interest:.2f}.")
         else:
             print("Invalid choice or operation not applicable to account type.")
     
@@ -191,11 +190,12 @@ class CLI_UI:
         if transaction_fee > 0:
             print(f"A transaction fee of €{transaction_fee:.2f} will be applied to this withdrawal.")
         
-        amount = self.ask_in_range(f"Enter the amount to withdraw (between €{min_withdraw} and €{max_withdraw}): ", [min_withdraw, max_withdraw], float)
+        amount = self.ask_in_range(f"Enter the amount to withdraw (between €{min_withdraw:.2f} and €{max_withdraw:.2f}): ", [min_withdraw, max_withdraw], float)
         if self.current_account.withdraw(amount):
             print(f"Withdrew €{amount:.2f} with a transaction fee of €{transaction_fee:.2f}. New balance is €{self.current_account.get_balance():.2f}.")
         else:
             print("Withdrawal unsuccessful. Please check the amount and try again.")
+    
     @staticmethod
     def ask_a_question_in_numbers(message,possible_answers={'1': 'Yes', '2': 'No'}):
         options_list = [f"{key}. {value}" for key, value in possible_answers.items()]
@@ -528,4 +528,6 @@ def interface_launcher(mode):
         app=TK_UI(root,bank_app)
         app.root.mainloop()
     subprocess.call(["python", os.path.join(main_directory, "launcher.py")])
-main()
+
+if __name__=="__main__":
+    main()
