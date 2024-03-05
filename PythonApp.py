@@ -6,9 +6,10 @@ import contextlib
 from ExternalFuncs import (ask_in_range,ask_a_question,style,safe_cast,Timer)
 import copy
 import tkinter as tk
+from tkinter import ttk
 from doctest import testmod #import doctest
 import time
-from threading import Thread# import threading
+from threading import Thread #import threading
 
 def main():
     global EURO
@@ -30,8 +31,171 @@ def main():
     # Day13()
     # Day14()
     # Day15()
+    Day16()
     print()
     timer.stop()
+
+def Day16():
+    
+    def Task2():
+        class Player:
+            def __init__(self, name: str, target: int, callback_event: callable) -> None:
+                self.name = name
+                self.target_score = target
+                self.current_score = 0
+                self.number_throws = 0
+                self.callback_event = callback_event
+                
+            def throw_a_dice(self):
+                roll = random.randint(1, 6)
+                self.number_throws += 1
+                self.current_score += roll
+                if self.current_score >= self.target_score:
+                    self.callback_event()
+
+        class Game:
+            def __init__(self) -> None:
+                self.root = tk.Tk()
+                self.root.title("Simple Game")
+                self.root.geometry("500x600")
+                self.score_label = tk.Label(self.root, padx=0, pady=0, relief='ridge', text="Score=0", font=('Verdana', 16))
+                self.score_label.pack()
+                self.player = Player("Tom", 30, self.stop_the_game)
+                self.is_running = False
+                self.start_button = tk.Button(self.root, text="Start", command=self.start_the_game) # Start button
+                self.start_button.pack(row=2)
+                self.stop_button = tk.Button(self.root, text="Stop", command=self.stop_the_game) # Stop button
+                self.stop_button.pack(row=2)
+                self.update_game_id=None
+                
+            def start_the_game(self):
+                if self.update_game_id is None:
+                    self.is_running = True
+                    self.update_game()
+                    
+            def stop_the_game(self):
+                if self.update_game_id is not None:
+                    self.root.after_cancel(self.update_game_id)
+                    self.update_game_id = None
+                    self.is_running = False
+                    
+            def update_game(self):
+                if self.is_running:
+                    self.player.throw_a_dice()
+                    self.score_label.config(text=f'Score={self.player.current_score}')
+                    self.update_game_id = self.root.after(500, self.update_game)
+
+        ui = Game()
+        ui.root.mainloop()
+
+    def Task1():
+        class Car:
+            _last_id = -1
+            def __init__(self, name, color, position_y, create_label_cb) -> None:
+                Car._last_id += 1
+                self.id = Car._last_id
+                self.name = name
+                self.color = color
+                self.position_x = 0
+                self.position_y = position_y
+                self.car_label = create_label_cb(self.name, self.color, self.position_y)
+
+        class Car_Manager:
+            def __init__(self, create_label_cb) -> None:
+                self.cars = []
+                self.finished_cars = []  # Track finished cars
+                self.create_label_cb = create_label_cb
+                self.race_finished = False
+                self.finish_line=770 # 1000 - 230 as the finish line
+                
+            def add_a_car(self, name: str, color: str):
+                position_y = len(self.cars) * 155
+                new_car = Car(name, color, position_y, self.create_label_cb)
+                self.cars.append(new_car)
+                
+            def check_race_finished(self):
+                return self.race_finished # Return True if race is finished, otherwise False
+
+            def update_finished_cars(self):
+                for car in self.cars:
+                    if car.position_x >= self.finish_line:
+                        if car not in self.finished_cars:
+                            self.finished_cars.append(car)
+                if len(self.finished_cars) > 0:
+                    self.race_finished = True
+        
+        class UI:
+            def __init__(self,root: tk.Tk) -> None:
+                self.root=root
+                self.root.title("Car Racing Game")
+                self.root.geometry("1000x780+500+100")  # Set the window geometry
+                self._ui_tickrate=50
+                self.frames=self.load_frames(7) # 7 frames
+            
+            @staticmethod
+            def load_frames(frame_count):
+                frames = []
+                try:
+                    for i in range(frame_count):
+                        path = f'images/kitty_race/frame_{i}_delay-0.1s.gif'
+                        frames.append(tk.PhotoImage(file=path))
+                except Exception as ex:
+                    print(f"Error in reading the images: {ex}")
+                return frames
+            
+            def update_animation(self, label, frame_index=0, delay=100):
+                frame = self.frames[frame_index % len(self.frames)]
+                label.configure(image=frame)
+                next_frame_index = (frame_index + 1) % len(self.frames)
+                self.root.after(delay, self.update_animation, label, next_frame_index, delay)
+
+
+            def add_car_label(self, name, color, position_y):
+                    # Method to create and return a car label
+                    car_label = tk.Label(self.root, text=name, bg=color)
+                    car_label.place(x=0, y=position_y)
+                    self.update_animation(car_label, 0, 50)
+                    separator = ttk.Separator(self.root, orient='horizontal')
+                    separator.place(x=0, y=position_y - 1, width=1000)
+                    return car_label
+                
+            def start_race(self, car_manager: Car_Manager):
+                    if not car_manager.check_race_finished():
+                        for car in car_manager.cars:
+                            if not car.finished:
+                                car.position_x += random.randint(1, 10)
+                                car.car_label.place(x=car.position_x, y=car.position_y)
+                                if car.position_x >= car_manager.finish_line:
+                                    car.finished = True
+                        car_manager.update_finished_cars()
+                        self.root.after(self._ui_tickrate, lambda: self.start_race(car_manager))
+                    else:
+                        self.show_winner_message(car_manager.finished_cars[0].name)
+                        self.show_placement(car_manager.finished_cars)
+
+            def show_winner_message(self, winner_name):
+                winner_message = f"{winner_name} wins the race!"
+                tk.messagebox.showinfo("Race Finished", winner_message)
+
+            def show_placement(self, finished_cars):
+                placement_message = "Race Placements:\n"
+                for i, car in enumerate(finished_cars, start=1):
+                    placement_message += f"{i}. {car.name}\n"
+                tk.messagebox.showinfo("Final Placements", placement_message)
+                
+        root = tk.Tk()
+        ui = UI(root)
+        car_manager = Car_Manager(ui.add_car_label)
+        car_manager.add_a_car('Tom','red')
+        car_manager.add_a_car('Ben','blue')
+        car_manager.add_a_car('Vik','green')
+        car_manager.add_a_car('Anna','purple')
+        car_manager.add_a_car('Marsel','black')
+        ui.start_race(car_manager)
+        ui.root.mainloop()
+
+    # Task1()
+    Task2()
 
 def Day15(): #Event driven programming
     
@@ -87,8 +251,7 @@ def Day15(): #Event driven programming
 
 
             def create_controls(self):
-                self.my_icon = tk.Label(self.root, text = "icon",
-                padx="0", pady="0", relief="ridge")
+                self.my_icon = tk.Label(self.root, text = "icon", padx="0", pady="0", relief="ridge")
                 self.my_icon.config(fg="red", font=("Arial",10))
                 self.my_icon.place(x = self.x_position, y = self.y_position)
                 self.my_icon.after(100,self.move_icon)
