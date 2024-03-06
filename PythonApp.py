@@ -1,15 +1,13 @@
-import random 
+import random,copy,time
 import pygame as pg
 import sqlite3 #import mysql connector
 import csv #import pyodbc
 import contextlib
-from ExternalFuncs import (ask_in_range,ask_a_question,style,safe_cast,Timer)
-import copy
+from ExternalFuncs import ask_in_range,ask_a_question,style,safe_cast,Timer
 import tkinter as tk
-from tkinter import ttk
-from doctest import testmod #import doctest
-import time
-from threading import Thread #import threading
+from tkinter import ttk,messagebox
+from doctest import testmod
+from threading import Thread
 
 def main():
     global EURO
@@ -31,12 +29,159 @@ def main():
     # Day13()
     # Day14()
     # Day15()
-    Day16()
+    # Day16()
+    Day17()
     print()
     timer.stop()
 
+def Day17(): #todolist #from tkcalendar import Calendar
+    class UI(tk.Tk):
+        def __init__(self) -> None:
+            super().__init__()
+            self.el_manager=Element_Manager()
+            self.title("To-Do List")
+            self.geometry("500x440+700+200")
+            self.resizable(width=False, height=False)
+            self.font=('Tahoma',12)
+            self.entry_box_def_message="Enter your todo here..."
+            self.history = []
+            self.create_controls()
+            
+        def create_controls(self):
+            self.grid_columnconfigure(0, weight=0)
+            self.grid_columnconfigure(1, weight=1)
+            self.grid_columnconfigure(2, weight=0)
+            self.entry_box=tk.Entry(self,font=self.font)
+            self.entry_box.grid(column=1,stick='ew',pady=10)
+            self.entry_box.insert(0, self.entry_box_def_message)
+            self.entry_box.config(fg='grey')
+            self.entry_box.bind("<FocusIn>", lambda event, m=self.entry_box_def_message, e=self.entry_box: self.clear_placeholder(event, m, e))
+            self.entry_box.bind("<FocusOut>", lambda event, m=self.entry_box_def_message, e=self.entry_box: self.restore_placeholder(event, m, e))
+            self.entry_box.bind('<Return>', self.adding_element)
+            
+            
+            self.add_btn=tk.Button(self,text='Add',font=self.font,width=15,command=self.adding_element)
+            self.add_btn.grid(column=1,stick='ew',pady=10)
+            
+            self.list = tk.Listbox(self,font=self.font,height=10, selectmode='extended')
+            self.list.grid(column=1,stick='ew',pady=10)
+            self.update_the_list() # update preset data
+            
+            self.add_btn=tk.Button(self,text='Delete',font=self.font,width=15,command=self.delete_element)
+            self.add_btn.grid(column=1,row=3,stick='e',pady=10)
+            
+            self.add_btn=tk.Button(self,text='Done',font=self.font,width=15,command=self.done_element)
+            self.add_btn.grid(column=1,row=3,stick='w',pady=10)
+            
+            self.add_btn=tk.Button(self,text='Undo',font=self.font,width=5,command=self.done_element)
+            self.add_btn.grid(column=1,row=4,stick='ew',pady=10)
+            
+        def adding_element(self,event=None):
+            el_title=self.entry_box.get().strip()
+            if el_title != self.entry_box_def_message and el_title != "":
+                self.el_manager.add_element(el_title,self.pop_duplication_msg, '', None)
+                self.update_the_list()
+                self.entry_box.delete(0, tk.END)
+            
+        def clear_placeholder(self, event, def_message, entry_box):
+            if entry_box.get() == def_message:
+                entry_box.delete(0, tk.END)
+                entry_box.config(fg='black')
+
+        def restore_placeholder(self, event, def_message, entry_box):
+            if entry_box.get() == "":
+                entry_box.config(fg='grey')
+                entry_box.insert(0, def_message)
+                
+        def update_the_list(self):
+            current_ui_titles = set(self.list.get(0, tk.END)) # Step 1: Get current titles from the Listbox
+            internal_titles = {el.title for el in self.el_manager.todo_list} # Step 2: Get titles from the internal todo_list
+            titles_to_add = internal_titles - current_ui_titles # Step 3: Find titles to add and remove
+            titles_to_remove = current_ui_titles - internal_titles
+            for title in titles_to_remove: # Step 4: Remove titles that are no longer present
+                index_to_remove = self.list.get(0, tk.END).index(title) # Find the index of the title to be removed
+                self.list.delete(index_to_remove)
+            for title in titles_to_add: # Step 5: Add new titles
+                self.list.insert(tk.END, title)
+        
+        @staticmethod
+        def pop_duplication_msg():
+            messagebox.showinfo("Duplicate", "An element with the same name already exists.")
+
+        def delete_element(self,action=''):
+            selected_indices=self.list.curselection()
+            self.el_manager.delete_elements(selected_indices)
+            self.update_the_list()
+            # self.history.append(('delete', (index, item)))
+            
+        def done_element(self):
+            pass
+        
+        def undo(self):
+            if not self.history:
+                return
+
+            action, details = self.history.pop()
+            if action == 'delete':
+                index, item = details
+                # For simplicity, insert at the end. Adjust if needed to insert at original index
+                self.listbox.insert(tk.END, item)
+
+
+    class Element:
+        _last_id = -1
+        def __init__(self,title,details='',alarm_target_time=None) -> None:
+            Element._last_id += 1
+            self.id = Element._last_id
+            self.title=title
+            self.details=details
+            self.completed=False
+            self.alarm_target_time=alarm_target_time
+
+    class Element_Manager:
+        def __init__(self) -> None:
+            self.todo_list=[]
+            self.add_dummy_els() # debug fill
+            
+        # def get_element(self,title):
+        #     return 
+        
+        def add_element(self,title,on_duplication_event,details='',alarm_target_time=None):
+            if any(el.title == title for el in self.todo_list):
+                on_duplication_event()
+            else:
+                self.todo_list.append(Element(title,details,alarm_target_time))
+        
+        def add_dummy_els(self):
+            dummies=[Element('Dummy1','Deets1',None),
+                     Element('Dummy2','Deets2',None),
+                     Element('Dummy3','Deets3',None),
+                     Element('Dummy4','Deets4',None),
+                     Element('Dummy5','Deets5',None)]
+            self.todo_list=dummies
+            
+        def complete_elements(self):
+            pass
+        
+        def delete_elements(self,selected_indices):
+            for i in sorted(selected_indices, reverse=True):
+                del self.todo_list[i]
+        
+        def set_alarm(self):
+            pass
+        
+        def edit_alarm(self):
+            pass
+        
+        def delete_alarm(self):
+            pass
+        
+
+    if __name__ == '__main__':
+        app = UI()
+        app.mainloop()
+
 def Day16():
-    
     def Task2():
         class Player:
             def __init__(self, name: str, target: int, callback_event: callable) -> None:
@@ -58,15 +203,18 @@ def Day16():
                 self.root = tk.Tk()
                 self.root.title("Simple Game")
                 self.root.geometry("500x600")
+                self.is_running = False
+                self.update_game_id=None
+                self.create_controls()
+                
+            def create_controls(self):
                 self.score_label = tk.Label(self.root, padx=0, pady=0, relief='ridge', text="Score=0", font=('Verdana', 16))
                 self.score_label.pack()
                 self.player = Player("Tom", 30, self.stop_the_game)
-                self.is_running = False
                 self.start_button = tk.Button(self.root, text="Start", command=self.start_the_game) # Start button
-                self.start_button.pack(row=2)
+                self.start_button.pack()
                 self.stop_button = tk.Button(self.root, text="Stop", command=self.stop_the_game) # Stop button
-                self.stop_button.pack(row=2)
-                self.update_game_id=None
+                self.stop_button.pack()
                 
             def start_the_game(self):
                 if self.update_game_id is None:
@@ -99,6 +247,7 @@ def Day16():
                 self.position_x = 0
                 self.position_y = position_y
                 self.car_label = create_label_cb(self.name, self.color, self.position_y)
+                self.finished=False
 
         class Car_Manager:
             def __init__(self, create_label_cb) -> None:
@@ -175,13 +324,13 @@ def Day16():
 
             def show_winner_message(self, winner_name):
                 winner_message = f"{winner_name} wins the race!"
-                tk.messagebox.showinfo("Race Finished", winner_message)
+                messagebox.showinfo("Race Finished", winner_message)
 
             def show_placement(self, finished_cars):
                 placement_message = "Race Placements:\n"
                 for i, car in enumerate(finished_cars, start=1):
                     placement_message += f"{i}. {car.name}\n"
-                tk.messagebox.showinfo("Final Placements", placement_message)
+                messagebox.showinfo("Final Placements", placement_message)
                 
         root = tk.Tk()
         ui = UI(root)
@@ -194,8 +343,9 @@ def Day16():
         ui.start_race(car_manager)
         ui.root.mainloop()
 
-    # Task1()
-    Task2()
+
+    # Task2()
+    Task1()
 
 def Day15(): #Event driven programming
     

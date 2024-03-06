@@ -89,7 +89,19 @@ class BCOLORS:
     ENDC = '\033[0m'
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
+    STRIKE = '\u0336'
 
+    def __init__(self, message, color):
+        """Initialize a BCOLOR object with a message and a color.
+        :param message: The message to be colored
+        :param color: The color to apply to the message        """
+        self.message = message
+        self.color = getattr(self, color.upper(), self.ENDC)
+    
+    def __str__(self):
+        """Return the formatted message with the specified color.
+        :return: The message wrapped in the specified ANSI color code        """
+        return f"{self.color}{self.message}{self.ENDC}"
 
 class Timer:
     def __init__(self, identifier=None):
