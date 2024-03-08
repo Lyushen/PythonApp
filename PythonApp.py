@@ -153,13 +153,10 @@ def Day17(): #todolist #from tkcalendar import Calendar
                 self.todo_list.append(Element(title,details,alarm_target_time))
         
         def add_dummy_els(self):
-            dummies=[Element('Dummy1','Deets1',None),
-                     Element('Dummy2','Deets2',None),
-                     Element('Dummy3','Deets3',None),
-                     Element('Dummy4','Deets4',None),
-                     Element('Dummy5','Deets5',None)]
-            self.todo_list=dummies
+            for i in range(5):
+                self.todo_list.append(Element(f'Dummy{i+1}',f'Deets{i+1}',None))
             
+                
         def complete_elements(self):
             pass
         
