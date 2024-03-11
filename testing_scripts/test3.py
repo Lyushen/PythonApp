@@ -9,9 +9,9 @@ def calculate_area(length:int, width:int) -> int:
         int: The area of the rectangle.
     Examples:
         >>> calculate_area(5, 5)
-        25
+            25
         >>> calculate_area(6, 7)
-        42
+            42
     """
     return length * width
 

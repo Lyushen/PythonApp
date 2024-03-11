@@ -6,7 +6,7 @@ import contextlib
 from ExternalFuncs import ask_in_range,ask_a_question,style,safe_cast,Timer
 import tkinter as tk
 from tkinter import ttk,messagebox
-from doctest import testmod
+import doctest
 from threading import Thread
 
 def main():
@@ -31,8 +31,27 @@ def main():
     # Day15()
     # Day16()
     Day17()
+    # Day18()
     print()
     timer.stop()
+
+def Day18():
+    def calculate_area(length:int, width:int) -> int:
+        """Calculate the area of a rectangle.
+        Args:
+            length (int): The length of the rectangle.
+            width (int): The width of the rectangle.
+        Returns:
+            int: The area of the rectangle.
+        Examples:
+            >>> calculate_area(5, 5)
+                25
+            >>> calculate_area(6, 7)
+                42
+        """
+        return length * width
+
+    doctest.testmod()
 
 def Day17(): #todolist #from tkcalendar import Calendar
     class UI(tk.Tk):
@@ -46,7 +65,7 @@ def Day17(): #todolist #from tkcalendar import Calendar
             self.entry_box_def_message="Enter your todo here..."
             self.history = []
             self.create_controls()
-            
+
         def create_controls(self):
             self.grid_columnconfigure(0, weight=0)
             self.grid_columnconfigure(1, weight=1)
@@ -55,10 +74,9 @@ def Day17(): #todolist #from tkcalendar import Calendar
             self.entry_box.grid(column=1,stick='ew',pady=10)
             self.entry_box.insert(0, self.entry_box_def_message)
             self.entry_box.config(fg='grey')
-            self.entry_box.bind("<FocusIn>", lambda event, m=self.entry_box_def_message, e=self.entry_box: self.clear_placeholder(event, m, e))
-            self.entry_box.bind("<FocusOut>", lambda event, m=self.entry_box_def_message, e=self.entry_box: self.restore_placeholder(event, m, e))
+            self.entry_box.bind("<FocusIn>", lambda event, e=self.entry_box: self.clear_placeholder(event, e))
+            self.entry_box.bind("<FocusOut>", lambda event,  e=self.entry_box: self.restore_placeholder(event, e))
             self.entry_box.bind('<Return>', self.adding_element)
-            
             
             self.add_btn=tk.Button(self,text='Add',font=self.font,width=15,command=self.adding_element)
             self.add_btn.grid(column=1,stick='ew',pady=10)
@@ -75,24 +93,24 @@ def Day17(): #todolist #from tkcalendar import Calendar
             
             self.add_btn=tk.Button(self,text='Undo',font=self.font,width=5,command=self.done_element)
             self.add_btn.grid(column=1,row=4,stick='ew',pady=10)
-            
+
         def adding_element(self,event=None):
             el_title=self.entry_box.get().strip()
             if el_title != self.entry_box_def_message and el_title != "":
                 self.el_manager.add_element(el_title,self.pop_duplication_msg, '', None)
                 self.update_the_list()
                 self.entry_box.delete(0, tk.END)
-            
-        def clear_placeholder(self, event, def_message, entry_box):
-            if entry_box.get() == def_message:
+
+        def clear_placeholder(self, event, entry_box):
+            if entry_box.get() == self.entry_box_def_message:
                 entry_box.delete(0, tk.END)
                 entry_box.config(fg='black')
 
-        def restore_placeholder(self, event, def_message, entry_box):
+        def restore_placeholder(self, event, entry_box):
             if entry_box.get() == "":
                 entry_box.config(fg='grey')
-                entry_box.insert(0, def_message)
-                
+                entry_box.insert(0, self.entry_box_def_message)
+
         def update_the_list(self):
             current_ui_titles = set(self.list.get(0, tk.END)) # Step 1: Get current titles from the Listbox
             internal_titles = {el.title for el in self.el_manager.todo_list} # Step 2: Get titles from the internal todo_list
@@ -103,7 +121,7 @@ def Day17(): #todolist #from tkcalendar import Calendar
                 self.list.delete(index_to_remove)
             for title in titles_to_add: # Step 5: Add new titles
                 self.list.insert(tk.END, title)
-        
+
         @staticmethod
         def pop_duplication_msg():
             messagebox.showinfo("Duplicate", "An element with the same name already exists.")
@@ -113,10 +131,10 @@ def Day17(): #todolist #from tkcalendar import Calendar
             self.el_manager.delete_elements(selected_indices)
             self.update_the_list()
             # self.history.append(('delete', (index, item)))
-            
+
         def done_element(self):
             pass
-        
+
         def undo(self):
             if not self.history:
                 return
@@ -126,7 +144,6 @@ def Day17(): #todolist #from tkcalendar import Calendar
                 index, item = details
                 # For simplicity, insert at the end. Adjust if needed to insert at original index
                 self.listbox.insert(tk.END, item)
-
 
     class Element:
         _last_id = -1
@@ -142,7 +159,7 @@ def Day17(): #todolist #from tkcalendar import Calendar
         def __init__(self) -> None:
             self.todo_list=[]
             self.add_dummy_els() # debug fill
-            
+
         # def get_element(self,title):
         #     return 
         

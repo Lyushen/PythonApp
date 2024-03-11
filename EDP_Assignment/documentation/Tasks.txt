@@ -1,0 +1,90 @@
+﻿Scenario:
+You work as a software developer for Future Interactive Technologies Ltd, a small software development company traditionally focused on bespoke database scripts. The company has recently tendered for a contract which will involve creating software using the Event Driven Programming (EDP) paradigm. Your manager has asked you to create a sample project demonstrating software developed using the EDP paradigm. 
+
+Task 1 – Planning and Designing an Event-Driven Programming Application (30 Marks)
+You have been tasked with preparing a software design document for a ‘To-Do List’ graphical user interface (GUI) based application. The application should consider users performing the following operations;
+i. Create new entries
+ii. View existing entries
+iii. Mark an existing entry as complete
+iv. Delete an existing entry 
+
+The software design document should at a minimum consider the following; Program Overview, Program Requirements, User Interface Design, Event Handling and Testing Approach. 
+
+    Task 1 TIPS:
+1. Program Overview: (1-2 paragraphs)
+    - list and explain the main Requirements
+2. Program Requirements:
+    - Dev environment: List dev environment (vscode), language - python
+    - External libraries (any libraries we imported)
+    - UML and/ Entity Diagram 
+    - Style (snake), classes in Uppercase (sentence)
+    - Justify choices (1-2 sentences)
+3. User Interface Design (1-2par+screenshots)
+    - Justify the choice of Tkinter (light and simple to use, built-in library)
+    - Name some possible alternatives (3 possible alternatives - pygame (not very suitable), pyqt (more features and little bit more difficult to use))
+    - Mock-up of screen (intuitive interface)
+4. Event Handling (2-3 parg)
+    -why use EDP
+    - What controls and events do we use
+    - what event handlers will you implement
+5. Approach to testing (list with explanatory sentence)
+    - Unit Tests - that each functionality works as intended (sentence)
+    - GUI Testing - ensure it's responsive
+    - Data validation - ensure the application handled invalid data correctly (Error handling)
+    - Database - Save/Load the data 
+    - Integrated testing - 
+    - User Acceptance Testing - functional and non-functional (looks, behaves..) requirements are met
+
+ Task 2 – Building an Event-Driven Programming Application (50 Marks)
+Using the Python programming language and design document prepared in Task 1, you must now build the ‘To-Do List’ application. Your code must adhere to coding best practices by being consistent, clear and well-documented. 
+
+    Task 2 TIPS
+Expected:
+1. Clear layout
+2. Conventions
+3. #some comments
+4. Functionality meets requirements
+5. Appropriate implementation of event handling
+    Recommendation:
+1. Provide screenshots and a short description demonstrating the main features of the application
+2. Provide a complete printout of your code
+
+
+
+Task 3 – Understanding Event-Driven Programming (20 Marks)
+In addition to the software developed, your manager has requested a report on the following two points to help other developers within the company further understand the EDP paradigm.
+A) Explain the key principles of the Event-Driven Programming paradigm and outline some of the primary ways in which it is used for software development.
+B) Detail some of the ways in which applications built using EDP can be tested in terms of methodologies, tools and libraries within python. Provide examples where possible.
+
+    Task 3A TIPS:
+Main: Clearly defined and explained EDP
+    Recommendation:
+- 1-2 paragraphs explaining the key principles EDP and how it is implemented in Tkinter(Event,EvMainLoop)
+- Code Snippet (from application or generic) expecting:
+    + A typical Button Command (code and explanation)
+    + Widgent's after event (optional)
+    + Implementation of CallBack (explanation, 'here is the function and I pass the reference to it has been passed to class construction')
+- List and explain one significant advantage (background functions and responsive UI) and one significant disadvantage (complicated and difficult to test) of EDP
+- List common application types that use of EDP
+
+    Task 3B:
+Expected: Appropriate detail of testing provided
+    Recommendation:
+The paragraph describing how your application can be tested and the following headings:
+- Unit Tests
+- Integrated Testing
+- GUI/ User Acceptance Testing
+1-2 sentence why EDP is difficult to test
+2-3 paragraphs describing how your EDP application could be tested. Consider the following:
+    - Docstrings
+    - Unitest
+    - What other test libraries could be used
+    - Manual and automated testing techniques
+    - Test Case Tracking Spreadsheet, code snippets and screenshots
+Example:
+Test Case Number #
+Description:
+Expected:
+Action:
+Screenshot:
+
