@@ -78,21 +78,33 @@ def Day17(): #todolist #from tkcalendar import Calendar
             self.entry_box.bind("<FocusOut>", lambda event,  e=self.entry_box: self.restore_placeholder(event, e))
             self.entry_box.bind('<Return>', self.adding_element)
             
-            self.add_btn=tk.Button(self,text='Add',font=self.font,width=15,command=self.adding_element)
-            self.add_btn.grid(column=1,stick='ew',pady=10)
+            self.delete_btn=tk.Button(self,text='Add',font=self.font,width=15,command=self.adding_element)
+            self.delete_btn.grid(column=1,stick='ew',pady=10)
             
             self.list = tk.Listbox(self,font=self.font,height=10, selectmode='extended')
             self.list.grid(column=1,stick='ew',pady=10)
+            self.list.bind('<<ListboxSelect>>', self.on_list_select) #Event for Listbox that triggers on selection
             self.update_the_list() # update preset data
             
-            self.add_btn=tk.Button(self,text='Delete',font=self.font,width=15,command=self.delete_element)
-            self.add_btn.grid(column=1,row=3,stick='e',pady=10)
+            self.delete_btn=tk.Button(self,text='Delete',font=self.font,width=15,command=self.delete_element)
+            self.delete_btn.grid(column=1,row=3,stick='e',pady=10)
+            self.delete_btn.config(state='disabled')
             
-            self.add_btn=tk.Button(self,text='Done',font=self.font,width=15,command=self.done_element)
-            self.add_btn.grid(column=1,row=3,stick='w',pady=10)
+            self.done_btn=tk.Button(self,text='Done',font=self.font,width=15,command=self.done_element)
+            self.done_btn.grid(column=1,row=3,stick='w',pady=10)
+            self.done_btn.config(state='disabled')
             
-            self.add_btn=tk.Button(self,text='Undo',font=self.font,width=5,command=self.done_element)
-            self.add_btn.grid(column=1,row=4,stick='ew',pady=10)
+            self.undo_btn=tk.Button(self,text='Undo',font=self.font,width=5,command=self.done_element)
+            self.undo_btn.grid(column=1,row=4,stick='ew',pady=10)
+
+        def on_list_select(self,event=''):
+            selected_items=self.list.curselection()
+            if len(selected_items)<=0:
+                self.delete_btn.config(state='disabled')
+                self.done_btn.config(state='disabled')
+            else:
+                self.delete_btn.config(state='normal')
+                self.done_btn.config(state='normal')
 
         def adding_element(self,event=None):
             el_title=self.entry_box.get().strip()
@@ -100,6 +112,7 @@ def Day17(): #todolist #from tkcalendar import Calendar
                 self.el_manager.add_element(el_title,self.pop_duplication_msg, '', None)
                 self.update_the_list()
                 self.entry_box.delete(0, tk.END)
+            
 
         def clear_placeholder(self, event, entry_box):
             if entry_box.get() == self.entry_box_def_message:
@@ -127,13 +140,18 @@ def Day17(): #todolist #from tkcalendar import Calendar
             messagebox.showinfo("Duplicate", "An element with the same name already exists.")
 
         def delete_element(self,action=''):
-            selected_indices=self.list.curselection()
-            self.el_manager.delete_elements(selected_indices)
+            selected_items=self.list.curselection()
+            self.el_manager.delete_elements(selected_items)
             self.update_the_list()
+            self.deselect_list_items()
             # self.history.append(('delete', (index, item)))
 
+        def deselect_list_items(self):
+            self.list.selection_clear(0, tk.END)
+            self.on_list_select()
+            
         def done_element(self):
-            pass
+            self.deselect_list_items()
 
         def undo(self):
             if not self.history:

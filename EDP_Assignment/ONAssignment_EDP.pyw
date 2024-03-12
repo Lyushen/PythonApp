@@ -13,7 +13,7 @@ class UI(tk.Tk):
             super().__init__()
             self.el_manager=Element_Manager()
             self.title("To-Do List")
-            self.geometry("700x550+700+200")
+            self.geometry("700x370+700+200")
             self.resizable(width=False, height=False)
             self.font=('Tahoma',12)
             self.entry_box_def_message="Enter your todo here..."
@@ -26,13 +26,14 @@ class UI(tk.Tk):
             self.entry_box.grid(column=0, row=0, sticky='ew', pady=10,padx=10, columnspan=2)
             self.entry_box.insert(0, self.entry_box_def_message)
             self.entry_box.config(fg='grey')
-            self.entry_box.bind("<FocusIn>", lambda event, e=self.entry_box: self.clear_placeholder(event, e))
-            self.entry_box.bind("<FocusOut>", lambda event, e=self.entry_box: self.restore_placeholder(event, e))
+            self.entry_box.bind("<FocusIn>", lambda event, m=self.entry_box_def_message, e=self.entry_box: self.clear_placeholder(event, e, m))
+            self.entry_box.bind("<FocusOut>", lambda event, m=self.entry_box_def_message, e=self.entry_box: self.restore_placeholder(event, e, m))
             self.entry_box.bind('<Return>', self.adding_element) # event driven example on Enter press
 
             self.add_btn = tk.Button(self, text='Add', font=self.font, command=self.adding_element)
             self.add_btn.grid(column=2, row=0, sticky='ew', pady=10,padx=10)
-
+            self.add_btn.config(state='disabled')
+            
             self.tree = ttk.Treeview(self, columns=('ID', 'Title', 'Description', 'Alarm', 'Done'), show='headings', selectmode='extended')
             self.tree.heading('ID', text='ID')
             self.tree.heading('Title', text='Title')
@@ -49,19 +50,56 @@ class UI(tk.Tk):
             scrollbar = tk.Scrollbar(self, orient="vertical", command=self.tree.yview)
             self.tree.configure(yscrollcommand=scrollbar.set)
             scrollbar.grid(column=3, row=1, sticky='ns', padx=0)
+            self.tree.bind('<<TreeviewSelect>>', self.on_list_select) #Event for Listbox that triggers on selection
+            self.tree.bind('<Escape>', self.deselect_treeview)
             
-            self.tree.grid(column=0, row=1, sticky='nsew', pady=10,padx=10, columnspan=3)
+            self.tree.grid(column=0, row=1, sticky='nsew', pady=10,padx=(10,0), columnspan=3)
             self.grid_columnconfigure(3, weight=0)
             self.update_the_list() # Update with preset data
 
             self.delete_btn = tk.Button(self, text='Delete', font=self.font, width=10, command=self.delete_element)
             self.delete_btn.grid(column=2, row=2, sticky='e', pady=10,padx=10,)
+            self.delete_btn.config(state='disabled')
         
             self.done_btn = tk.Button(self, text='Mark Done', font=self.font, width=10, command=self.done_element)
             self.done_btn.grid(column=0, row=2, sticky='w', pady=10,padx=10,)
+            self.done_btn.config(state='disabled')
 
             self.undo_btn = tk.Button(self, text='Undo', font=self.font, width=10, command=self.undo)
             self.undo_btn.grid(column=1, row=2, sticky='ew', pady=10,padx=10,)
+
+
+        def deselect_treeview(self,event):
+            for item in self.tree.selection():
+                self.tree.selection_remove(item)
+
+        def on_list_select(self,event=''):
+            selected_items=self.tree.selection()
+            if len(selected_items)<=0:
+                self.delete_btn.config(state='disabled')
+                self.done_btn.config(state='disabled')
+            else:
+                self.delete_btn.config(state='normal')
+                self.done_btn.config(state='normal')
+
+        def clear_placeholder(self,event, entry_box, default_message:str):
+            if entry_box.get() == default_message:
+                entry_box.delete(0, tk.END)
+                entry_box.config(fg='black')
+            self.add_btn.config(state='normal')
+
+        def restore_placeholder(self, event, entry_box, default_message:str):
+            if entry_box.get() == "":
+                entry_box.config(fg='grey')
+                entry_box.insert(0, default_message)
+            self.add_btn.config(state='disabled')
+
+        def update_the_list(self):
+            for item in self.tree.get_children():
+                self.tree.delete(item)
+            for inx,el in enumerate(self.el_manager.todo_list):
+                done_status = '「✔」' if el.completed else '「    」'
+                self.tree.insert('', 'end', values=(inx+1, el.title, el.details, el.alarm_target_time, done_status))
 
         def adding_element(self, event=None):
             title = self.entry_box.get().strip()
@@ -69,31 +107,14 @@ class UI(tk.Tk):
                 self.el_manager.add_element(title, '')
                 self.update_the_list()
                 self.entry_box.delete(0, tk.END)
-
-        @staticmethod
-        def clear_placeholder(event, entry_box):
-            if entry_box.get() == UI.entry_box_def_message:
-                entry_box.delete(0, tk.END)
-                entry_box.config(fg='black')
-
-        @staticmethod
-        def restore_placeholder(event, entry_box):
-            if entry_box.get() == "":
-                entry_box.config(fg='grey')
-                entry_box.insert(0, UI.entry_box_def_message)
-
-        def update_the_list(self):
-            for item in self.tree.get_children():
-                self.tree.delete(item)
-            for el in self.el_manager.todo_list:
-                done_status = '「✔」' if el.completed else '「    」'
-                self.tree.insert('', 'end', values=(el.id, el.title, el.details, el.alarm_target_time, done_status))
+                self.focus()
 
         def delete_element(self):
             selected_items = self.tree.selection()
             ids_to_delete = [self.tree.item(item, 'values')[0] for item in selected_items]
             self.el_manager.delete_elements_by_ids(ids_to_delete)
             self.update_the_list()
+        
         def done_element(self):
             selected_items = self.tree.selection()
             for item in selected_items:
@@ -137,8 +158,7 @@ class Element_Manager:
         for el in self.todo_list:
             if el.id == el_id:
                 el.completed = not el.completed
-                # Record this action for undo
-                self.history.append(('complete', [el_id]))
+                self.history.append(('complete', [el_id])) # Recording the action for undo
                 break
     
     def delete_elements_by_ids(self, ids_to_delete):
