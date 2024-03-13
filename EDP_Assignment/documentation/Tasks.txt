@@ -33,7 +33,8 @@ The software design document should at a minimum consider the following; Program
     - Data validation - ensure the application handled invalid data correctly (Error handling)
     - Database - Save/Load the data 
     - Integrated testing - 
-    - User Acceptance Testing - functional and non-functional (looks, behaves..) requirements are met
+    - User Acceptance Testing - functional and non-functional (how fast, looks, behaves..) requirements are met
+    ! Empty Table with headers of testing such as Test ID, Description, Expecting Results, Action, Actual Results
 
  Task 2 – Building an Event-Driven Programming Application (50 Marks)
 Using the Python programming language and design document prepared in Task 1, you must now build the ‘To-Do List’ application. Your code must adhere to coding best practices by being consistent, clear and well-documented. 
