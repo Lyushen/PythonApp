@@ -14,7 +14,7 @@ class Task:
         self.completed=completed
 
 class Task_Manager:
-    """General Task Manager intened to store list of Tasks, history and flag to identify changes"""
+    """General Task Manager intended to store list of Tasks, history and flag to identify changes"""
     def __init__(self) -> None:
         self.todo_list=[]
         self.history = []

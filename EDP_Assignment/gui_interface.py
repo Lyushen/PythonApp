@@ -23,6 +23,7 @@ class UI(tk.Tk):
         self.last_sort_col = None # Sorting variables. Remember last sorted column
         self.sort_reverse = False 
         self.dragged_item = None
+        self.scroll_enabled=False
     
     # Initialisation
     def on_start(self):
@@ -76,9 +77,9 @@ class UI(tk.Tk):
         self.tree.bind('<Double-1>', self.complete_task) # Bind double-click event
         self.tree.grid(column=0, row=1, sticky='nsew', pady=10,padx=(10,0), columnspan=3)
         # Adding the scrollbar to our Treeview
-        scrollbar = Scrollbar(self, orient="vertical", command=self.tree.yview)
-        self.tree.configure(yscrollcommand=scrollbar.set)
-        scrollbar.grid(column=3, row=1, sticky='ns', padx=0)
+        self.scrollbar = Scrollbar(self, orient="vertical", command=self.tree.yview)
+        self.tree.configure(yscrollcommand=self.scrollbar.set)
+        self.scrollbar.grid(column=3, row=1, sticky='ns', padx=0)
         # Adding Delete button
         self.delete_btn = Button(self, text='Delete', font=self.font, width=10, command=self.delete_task)
         self.delete_btn.grid(column=1, row=2, sticky='e', pady=10,padx=10)
@@ -263,7 +264,7 @@ class UI(tk.Tk):
             print(f'Error in context menu:{e}')
 
     def tree_sort_column(self, col:str):
-        """Sorting tree by cleacing on a column header. Prioritizing Ascending sorting. Only if you already selected column press second time - Descending order will apply.
+        """Sorting tree by clecking on a column header. Prioritizing Ascending sorting. Only if you already selected column press second time - Descending order will apply.
 
         Args:
             col (str): Column name
