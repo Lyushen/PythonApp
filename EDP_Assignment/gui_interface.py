@@ -1,109 +1,14 @@
 import tkinter as tk
 from tkinter import ttk,messagebox,filedialog,Entry,Scrollbar,Button,Menu#,Frame,Label
 import os,ctypes
-
-RELATIVE_PY_PATH=os.path.dirname(os.path.abspath(__file__)) # Constant to get current path of the .py file to build relative path
-
-def safe_cast(value, to_type, default=None):
-    """This function ensures that we won't get an error during the converting
-    Args:
-        value (str): String representation of the value that we need to convert
-        to_type (type): To what type should we convert (int, float, etc)
-        default (any, optional): Any value that the user wants to return if the converting failed. Defaults to None.
-    Returns:
-        type: converted value to required type    """
-    try:
-        return to_type(value)
-    except (ValueError, TypeError) as ex:
-        print(f"DEBUG: Convertation error - {ex}. Returning defaul value '{default}'.")
-        return default
-
-class Database_IO:
-    """A separate Database class is made to create some private functions that aim to interact with database files."""
-    def __init__(self, el_manager):
-        """Database_IO class initialisation. We receive as an argument the referance to our external Element_Manager instance.
-        Args:
-            el_manager (Element_Manager): The received reference is to ensure that we use only one list        """
-        self.database_dir:str = RELATIVE_PY_PATH + '/database' # relative directory + database work directory
-        os.makedirs(self.database_dir, exist_ok=True) # Ensure the directory exists, otherwise create it without an error
-        self.file_type='.csv' # just incase we want to change the default extention to txt for example
-        self.db_file_name:str='db_todo' # database file name
-        self.db_file_path:str=os.path.join(self.database_dir,self.db_file_name+self.file_type) # Building database file path with os.path.join function built-in the os library
-
-        self.el_manager = el_manager
-
-    def db_save_file(self,file_path:str=None):
-        """This is a public function to save the todo list to the file
-
-        Args:
-            file_path (str, optional): Defaults (if none) to self.db_file_path. The path to our file that we're going to write. Parameter is optional because if we able to pass parameter which to which file we want to save, we use predefined database directory, from relative path that has been built in db_file_path        """
-        if file_path is None:
-            file_path = self.db_file_path
-        if self.__write_file(file_path):
-            self.is_modified=False
-
-    def db_read_file(self,update_callback:callable,file_path:str=None):
-        """The public function inside our Database_IO class is intended to read our database file. We also redefine db_filepath received from the user in case of usage of the Open File function
-
-        Args:
-            update_callback (callable): As parameter we receive reference to update the interface function and we call it on succesfull complition of private __read_file function
-            file_path (str, optional): Defaults (if none) to self.db_file_path. The path to our file. Parameter is optional because if we don't use this function to open file, we use predefined database directory, from relative path that has been built in db_file_path        """
-        if file_path is None:
-            file_path = self.db_file_path
-        if self.__read_file(file_path):
-            if file_path != self.db_file_path:
-                self.db_file_path = file_path # redefine the file path 
-            update_callback()
-
-    def __read_file(self,file_path:str) -> bool:
-        """Private function to read a database file
-
-        Args:
-            file_path (str): Path to the file that we want to read
-
-        Returns:
-            bool: We return succsessful or not was the function, if not, we don't call an update_interface callback function        """
-        try:
-            self.el_manager.todo_list=[] # clear list before we refill it with the new read data
-            with open(file_path, 'r', encoding="utf-8") as csvfile:
-                content = csvfile.read()  # Read the entire file content at once
-                lines = content.strip().split('\n')  # Split content into lines
-                for line in lines:
-                    splitted_data = line.strip().split(',') #strip() cuts the non-printable characters like \n on beginning and end of the string
-                    self.el_manager.todo_list.append(Element(splitted_data[0],splitted_data[1],splitted_data[2],safe_cast(splitted_data[3],int,0)))
-                return True
-        except Exception as ex:
-            print(f"Error in reading the file '{file_path}'\n{ex}")
-            return False
-    
-    def __write_file(self, file_path:str, append:bool=False) -> bool:
-        """Private function to write the database file
-
-        Args:
-            file_path (str): Path to the file that we want to write
-            append (bool, optional): Defaults to False. if we want to add data to existing list, we can set parameter to True and we will use Appent instead of Write 
-
-        Returns:
-            bool: Rerurn Success of the function        """
-        try:
-            content = ''
-            for el in self.el_manager.todo_list:
-                content += f"{el.title},{el.details},{el.alarm_target_time},{0 if el.completed==False else 1}\n"
-            with open(file_path, 'a' if append else 'w', encoding="utf-8") as csvfile: # Optional parameter Append if we passed True or Write if we passed False or used defaul value
-                csvfile.write(content) # Write the file in one go
-            print(f'Successfully wrote the file {file_path}')  # Corrected
-            # Assuming you have a method to update the is_modified flag or directly accessing the attribute
-            self.el_manager.is_modified = False  # Directly setting the attribute, adjust according to your implementation
-            return True
-        except Exception as ex:
-            print(f"Error in writing the file '{file_path}'\n{ex}")
-            return False
+from task_manager import Task_Manager
+from db_io import Database_IO,RELATIVE_PY_PATH,safe_cast
 
 class UI(tk.Tk):
     def __init__(self) -> None:
         """The initialisation of our GUI interface, as we inherit from tk.Tk parent, we can refer to self as to root. It simplifies interaction with root. Instead of using self.root. all the time, we refer to self.        """
         super().__init__() # Inherits of the root
-        self.el_manager=Element_Manager() # Initialisation of the instance of Element_Manager, that will be stroing and responsible for interaction our database list
+        self.el_manager=Task_Manager() # Initialisation of the instance of Element_Manager, that will be stroing and responsible for interaction our database list
         self.db_ref = Database_IO(self.el_manager) #  The passsage of the reference to ensure that we use only one Element_Manager.todo_list
         self.title("To-Do List")
         self.geometry("700x370+700+200")
@@ -378,79 +283,9 @@ class UI(tk.Tk):
             entry_box.config(fg='grey')
             entry_box.insert(0, default_message)
 
-class Element:
-    def __init__(self,title,details='',alarm_target_time=None,completed=False) -> None:
-        self.title=title
-        self.details=details
-        self.alarm_target_time=alarm_target_time
-        self.completed=completed
-
-class Element_Manager:
-    def __init__(self) -> None:
-        self.todo_list=[]
-        self.history = []
-        self.is_modified=False
-        # self.add_dummies() # debug fill
-      
-    def add_dummies(self):
-        for i in range(1,21):
-            self.add_element(f'Dummy{i}',f'Deets{i}',None,False)
-    
-    def add_element_by_index(self,index:int, title:str, details:str='', alarm_target_time=None,completed:bool=False):
-        new_element = Element(title, details, alarm_target_time, completed)
-        self.todo_list.insert(index, new_element)
-        self.history.append(('add', len(self.todo_list) - 1, new_element)) # Store the action, index, and element object in history
-        self.is_modified=True
-    
-    def add_element(self, title, details='', alarm_target_time=None,completed=False):
-        new_element = Element(title, details, alarm_target_time, completed)
-        self.todo_list.append(new_element)
-        self.history.append(('add', len(self.todo_list) - 1, new_element)) # Store the action, index, and element object in history
-        self.is_modified=True
-
-    def complete_element(self, indexes):
-        unique_indexes = set(indexes)
-        for index in unique_indexes:
-            if 0 <= index < len(self.todo_list):
-                element = self.todo_list[index]
-                element.completed = not element.completed  # Toggle the completion status
-                # Record this action for undo
-                self.history.append(('complete', index, element.completed))
-        self.is_modified=True
-
-    def delete_elements_by_ids(self, ids_to_delete):
-        indexes_to_delete_sorted = sorted(ids_to_delete, reverse=True)
-        for index in indexes_to_delete_sorted:
-            if index < len(self.todo_list) and index >= 0:
-                deleted_element = self.todo_list.pop(index)  # pop by index
-                # Store the action, index, and element object before deletion
-                self.history.append(('delete', index, deleted_element))
-        self.is_modified=True
-        
-    def undo(self):
-        if not self.history:
-            return
-        action, index, data = self.history.pop()
-        if action == 'delete':
-            # Insert the element back at its original position
-            self.todo_list.insert(index, data)
-        elif action == 'add':
-            # Remove the element that was last added
-            self.todo_list.pop(index)
-        elif action == 'complete':
-            # Revert the completion status
-            self.todo_list[index].completed = not self.todo_list[index].completed # Switch (Flip) a task status
-        self.is_modified=True
-    
-    def set_alarm(self):
-        pass
-    
-    def edit_alarm(self):
-        pass
-    
-    def delete_alarm(self):
-        pass
-
-if __name__ == '__main__':
+def main():
     app = UI()
     app.mainloop()
+
+if __name__ == '__main__':
+    main()
