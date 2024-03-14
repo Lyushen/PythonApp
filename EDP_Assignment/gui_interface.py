@@ -16,7 +16,7 @@ class UI(tk.Tk):
         self.font=('Tahoma',12) # Default font
         self.entry_box_def_message="Enter your todo here..." # Message for enter_box Entry, as we use it multiple times, we better to store it once
         self.entry_var = tk.StringVar() # Setup a string variable that will be attached to entry box to track changes and disable or enable add button
-        if os.name == 'nt': ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID() # Apply icon to current app_id. Usable to apply icon to Windows' Taskbar using ctypes library. To avoid issues we check if that is Windows to use windll library
+        if os.name == 'nt': ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID() # Apply icon to current app_id. Usable to apply icon to Windows' Taskbar using ctypes library. To avoid issues we check if that is Windows to use windll library. May not work as intended as it's not compiled exe version.
         self.iconbitmap(default=RELATIVE_PY_PATH + '/database/ico/to-do-list.ico')
         self.on_start() # Initialization stage where we create controls and read our db file
         self.protocol("WM_DELETE_WINDOW", self.on_exit_app) # creating track for the even when we close the app with X
@@ -38,18 +38,23 @@ class UI(tk.Tk):
         self.configure(background='#FEEFCD')
         # Grid configuration
         self.grid_columnconfigure(0, weight=1)
+        self.grid_columnconfigure(1, weight=1)
+        self.grid_columnconfigure(2, weight=1)
+        self.grid_columnconfigure(3, weight=1)
         self.columnconfigure(1, weight=3)
         # Entry Box lable used to add elements to the list
         self.entry_box = Entry(self, font=self.font, fg='grey', textvariable=self.entry_var)
-        self.entry_box.grid(column=0, row=0, sticky='ew', pady=10,padx=10, columnspan=2)
+        self.entry_box.grid(column=0, row=0, sticky='we', pady=10, padx=(10,140), columnspan=3)
         self.entry_box.insert(0, self.entry_box_def_message) # Preset default holder message into our enry_box on creation stage
         self.entry_box.bind("<FocusIn>", lambda event, m=self.entry_box_def_message, e=self.entry_box: self.clear_placeholder(e, m, event))
         self.entry_box.bind("<FocusOut>", lambda event, m=self.entry_box_def_message, e=self.entry_box: self.restore_placeholder(e, m, event))
         self.entry_box.bind('<Return>', self.add_task) # Event-driven example on Enter press
         self.entry_box.bind('<Escape>', self.deselect_widget) # Deselect the Entry Box on Escape button
+        # Setup tracking system for the entry_box input variable that will call an event each time the value is changing
+        self.entry_var.trace_add("write", self.on_entry_change)
         # Add button creation
-        self.add_btn = tk.Button(self, text='Add', font=self.font, command=self.add_task)
-        self.add_btn.grid(column=2, row=0, sticky='ew', pady=10,padx=10)
+        self.add_btn = tk.Button(self, text='Add', font=self.font, command=self.add_task, width=10)
+        self.add_btn.grid(column=2, row=0, sticky='e', pady=10, padx=10)
         self.add_btn.config(state='disabled') # By default, it will be disabled, as no elements selected in a Treeview filed
         self.add_btn.bind('<Button-1>', self.on_disabled_add_btn) # Even if the button disabled, we still are able to track pressing, in our case we use it to focus on the Enry Box
         # Treeview widget used from tkinter.ttk library to display our todo_list
@@ -69,25 +74,27 @@ class UI(tk.Tk):
         self.tree.bind('<Escape>', self.deselect_widget) # Escape button to deselect our choices
         self.tree.bind('<Delete>', self.delete_task) # Escape button to deselect our choices
         self.tree.bind('<Double-1>', self.complete_task) # Bind double-click event
-        self.tree.grid(column=0, row=1, sticky='nsew', pady=10,padx=(10,0), columnspan=5)
+        self.tree.grid(column=0, row=1, sticky='nsew', pady=10,padx=(10,0), columnspan=3)
         # Adding the scrollbar to our Treeview
         scrollbar = Scrollbar(self, orient="vertical", command=self.tree.yview)
         self.tree.configure(yscrollcommand=scrollbar.set)
         scrollbar.grid(column=3, row=1, sticky='ns', padx=0)
         # Adding Delete button
         self.delete_btn = Button(self, text='Delete', font=self.font, width=10, command=self.delete_task)
-        self.delete_btn.grid(column=2, row=2, sticky='e', pady=10,padx=10,)
+        self.delete_btn.grid(column=1, row=2, sticky='e', pady=10,padx=10)
         self.delete_btn.config(state='disabled') # Disable state by default
         # Adding Done button
         self.done_btn = Button(self, text='Complete', font=self.font, width=10, command=self.complete_task)
         self.done_btn.grid(column=0, row=2, sticky='w', pady=10,padx=10,)
         self.done_btn.config(state='disabled') # Disable state by default
+        # Adding Duplicate button
+        self.duplicate_btn = Button(self, text='Duplicate', font=self.font, width=10, command=self.duplicate_task)
+        self.duplicate_btn.grid(column=1, row=2, sticky='w', pady=10,padx=10)
+        self.duplicate_btn.config(state='disabled') # Disable state by default
         # Adding Undo button
         self.undo_btn = Button(self, text='Undo', font=self.font, width=10, command=self.undo)
-        self.undo_btn.grid(column=1, row=2, sticky='e', pady=10, padx=10)
+        self.undo_btn.grid(column=2, row=2, sticky='e', pady=10, padx=10)
         self.undo_btn.config(state='disabled') # Disable state by default
-        # Setup tracking system for the entry_box input variable that will call an event each time the value is changing
-        self.entry_var.trace_add("write", self.on_entry_change)
         # Setup menu
         self.menu_bar = Menu(self)
         self.config(menu=self.menu_bar)
@@ -106,16 +113,17 @@ class UI(tk.Tk):
         self.bind('<Control-q>', self.on_exit_app)
         self.bind('<Control-d>', self.duplicate_task)
         self.bind('<Control-z>', self.undo)
-        self.bind('<Control-a>', self.select_all)
+        self.bind('<Control-c>', self.complete_task)
+        self.tree.bind('<Control-a>', self.select_all)
         # Create a context menu
         self.context_menu = tk.Menu(self, tearoff=0)
-        self.context_menu.add_command(label="Complete", command=self.complete_task)
-        self.context_menu.add_command(label="Duplicate", command=self.duplicate_task)
-        self.context_menu.add_command(label="Delete", command=self.delete_task)
+        self.context_menu.add_command(label="Complete", command=self.complete_task, accelerator="Ctrl+C")
+        self.context_menu.add_command(label="Duplicate", command=self.duplicate_task, accelerator="Ctrl+D")
+        self.context_menu.add_command(label="Delete", command=self.delete_task, accelerator="Delete")
         self.context_menu.add_separator()
-        self.context_menu.add_command(label="Undo", command=self.undo)
+        self.context_menu.add_command(label="Undo", command=self.undo, accelerator="Ctrl+Z")
         self.context_menu.add_separator()
-        self.context_menu.add_command(label="Select All", command=self.select_all)
+        self.context_menu.add_command(label="Select All", command=self.select_all, accelerator="Ctrl+A")
         # Bind the right-click context menu
         self.tree.bind("<Button-3>", self.show_context_menu)
 
@@ -181,7 +189,8 @@ class UI(tk.Tk):
             self.tree.insert('', 'end', values=(inx+1, el.title, el.details, el.alarm_target_time, done_status))
 
     def add_task(self,*_):
-        """_summary_        """
+        """The function adds task elements to the todo storage list. Also we update the tree and clear previous entry and out-focus the entrybox 
+        This function also has an additional optional parameter to make it callable as an event."""
         title = self.entry_box.get().strip()
         if title != self.entry_box_def_message and title != "":
             self.el_manager.add_element(title)
@@ -190,26 +199,37 @@ class UI(tk.Tk):
             self.focus()
 
     def delete_task(self,*_):
+        """Deletion number of tasks, possible multiple selection and delete multiple. And updates the tree. Has DELETE hotkey.
+        This function also has an additional optional parameter to make it callable as an event."""
         selected_indices = [self.tree.index(item) for item in self.tree.selection()] # Retrieve the correct index
         self.el_manager.delete_elements_by_ids(selected_indices) # delete elements by indexes
         self.update_ui_tree()
     
     def complete_task(self,*_):
+        """Completing tasks with multiple selection. And updates the tree.
+        This function also has an additional optional parameter to make it callable as an event."""
         indexes_to_toggle = [self.tree.index(item) for item in self.tree.selection()]  # Retrieve the correct index
         self.el_manager.complete_element(indexes_to_toggle) # call the complete method with the list of indexes
         self.update_ui_tree()
 
     def undo(self,*_):
+        """Undo added,deleted or completed tasks one action by the time. And updates the tree. Has Ctrl+Z hotkey.
+        This function also has an additional optional parameter to make it callable as an event."""
         self.el_manager.undo()
         self.update_ui_tree()
         
     def undo_button_state_check(self):
+        """In each update tree call we check if there is history for UNDO action, if there is, we enable button, otherwise history has no stored actions. The same for context menu option."""
         if len(self.el_manager.history)>0:
             self.undo_btn.config(state='normal')
+            self.context_menu.entryconfig("Undo", state="normal")
         else:
             self.undo_btn.config(state='disabled')
+            self.context_menu.entryconfig("Undo", state="disabled")
         
     def duplicate_task(self, *_):
+        """Duplication of the task, it supports multiple selections and places duplications after each currently selected task (by index in the list).
+        This function also has an additional optional parameter to make it callable as an event."""
         selected_items = self.tree.selection()  # Get the selected item(s)
         for item in reversed(selected_items):
             item_values = self.tree.item(item, 'values')
@@ -218,27 +238,42 @@ class UI(tk.Tk):
         self.update_ui_tree()
     
     def select_all(self,*_):
+        """Select All function when tree is focused. Has CTRL+A hotkey.
+        This function also has an additional optional parameter to make it callable as an event."""
         self.tree.selection_set(self.tree.get_children())
         
     # Events    
     def show_context_menu(self, event):
-        try: # Try to get the tree item clicked
-            item = self.tree.identify_row(event.y)
-            if item: # Select the item and show the context menu
-                self.tree.selection_set(item)
-                self.context_menu.post(event.x_root, event.y_root)
+        """Displays context menu on Right Mouse Button press without altering selection. Operates on already selected items.
+        If no items are selected, it disables certain actions."""
+        try:
+            if self.tree.selection():
+                # Enable actions if items are selected
+                self.context_menu.entryconfig("Complete", state="normal")
+                self.context_menu.entryconfig("Duplicate", state="normal")
+                self.context_menu.entryconfig("Delete", state="normal")
             else:
-                self.context_menu.unpost()
+                # Disable actions if no items are selected
+                self.context_menu.entryconfig("Complete", state="disabled")
+                self.context_menu.entryconfig("Duplicate", state="disabled")
+                self.context_menu.entryconfig("Delete", state="disabled")
+            # Show the context menu at the cursor's location in any case
+            self.context_menu.post(event.x_root, event.y_root)
         except Exception as e:
-            print(e)
+            print(f'Error in context menu:{e}')
 
-    def tree_sort_column(self, col):
+    def tree_sort_column(self, col:str):
+        """Sorting tree by cleacing on a column header. Prioritizing Ascending sorting. Only if you already selected column press second time - Descending order will apply.
+
+        Args:
+            col (str): Column name
+        """
         if self.last_sort_col != col: # Ensure that we always switch to ascending sorting when we switch to a new column
             self.sort_reverse = False
         else:
             self.sort_reverse = not self.sort_reverse
         if col == 'ID':
-            l = [(safe_cast((self.tree.set(k, col)),int,0), k) for k in self.   tree.get_children('')]
+            l = [(safe_cast((self.tree.set(k, col)),int,0), k) for k in self.tree.get_children('')]
         else:
             l = [(self.tree.set(k, col), k) for k in self.tree.get_children('')]
         l.sort(reverse=self.sort_reverse)
@@ -248,6 +283,7 @@ class UI(tk.Tk):
         self.tree.heading(col, command=lambda: self.tree_sort_column(col))
     
     def on_entry_change(self,*_):
+        """This function-event triggers when entry_var gets changed to enable/disable add button"""
         content = self.entry_var.get()
         if content.strip() and content != self.entry_box_def_message:
             self.add_btn.config(state='normal')
@@ -255,9 +291,11 @@ class UI(tk.Tk):
             self.add_btn.config(state='disabled')
 
     def on_disabled_add_btn(self,*_):
+        """Simple function to focus on the entry box"""
         self.entry_box.focus()
         
     def deselect_widget(self,*_):
+        """If we have selection inside the tree, we deselect it, otherwise we focus on the root window"""
         if self.tree.selection():
             for item in self.tree.selection():
                 self.tree.selection_remove(item)
@@ -265,20 +303,25 @@ class UI(tk.Tk):
             self.focus()
 
     def on_list_select(self,*_):
+        """Disable/Enable Done and Delete buttons and their context menus if we have selected at least one task."""
         selected_items=self.tree.selection()
         if len(selected_items)<=0:
             self.delete_btn.config(state='disabled')
             self.done_btn.config(state='disabled')
+            self.duplicate_btn.config(state='disabled')
         else:
             self.delete_btn.config(state='normal')
             self.done_btn.config(state='normal')
+            self.duplicate_btn.config(state='normal')
 
     def clear_placeholder(self,entry_box, default_message:str,*_):
+        """Function-event that clear placeholder massage when we focusing it"""
         if entry_box.get() == default_message:
             entry_box.delete(0, tk.END)
             entry_box.config(fg='black')
 
     def restore_placeholder(self,entry_box, default_message:str,*_):
+        """Function-event that restore the placeholder massage when we unfocus it"""
         if entry_box.get() == "":
             entry_box.config(fg='grey')
             entry_box.insert(0, default_message)

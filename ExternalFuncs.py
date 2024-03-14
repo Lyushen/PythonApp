@@ -4,7 +4,7 @@ def safe_cast(value, to_type, default=None):
     try:
         return to_type(value)
     except (ValueError, TypeError) as ex:
-        print(f"DEBUG: Convertation error - {ex}. Returning defaul value '{default}'.")
+        print(f"DEBUG: Convertation error - {ex}. Returning default value '{default}'.")
         return default
 
 def extract_keys(products):

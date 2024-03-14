@@ -16,7 +16,7 @@ The software design document should at a minimum consider the following; Program
 2. Program Requirements:
     - Dev environment: List dev environment (vscode), language - python
     - External libraries (any libraries we imported)
-    - UML and/ Entity Diagram 
+    - UML and/ Entity Diagram
     - Style (snake), classes in Uppercase (sentence)
     - Justify choices (1-2 sentences)
 3. User Interface Design (1-2par+screenshots)
@@ -24,7 +24,7 @@ The software design document should at a minimum consider the following; Program
     - Name some possible alternatives (3 possible alternatives - pygame (not very suitable), pyqt (more features and little bit more difficult to use))
     - Mock-up of screen (intuitive interface)
 4. Event Handling (2-3 parg)
-    -why use EDP
+    - Why use EDP
     - What controls and events do we use
     - what event handlers will you implement
 5. Approach to testing (list with explanatory sentence)

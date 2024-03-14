@@ -4,7 +4,7 @@ import sys
 import subprocess
 import os
 
-class Bank_Accounts:
+class Bank_Account: # Thank you, Tom, it should be Bank_Account, not Bank_Accounts
     def __init__(self, account_number: str, first_name: str, last_name: str) -> None:
         self.account_number = account_number
         self.first_name = first_name
@@ -27,7 +27,7 @@ class Bank_Accounts:
     def get_balance(self) -> float:
         return self._balance
 
-class Current_Account(Bank_Accounts):
+class Current_Account(Bank_Account):
     transaction_fee = 1.50
 
     def __init__(self, account_number: str, first_name: str = "", last_name: str = "") -> None:
@@ -40,7 +40,7 @@ class Current_Account(Bank_Accounts):
                 return True
         return False
 
-class Savings_Account(Bank_Accounts):
+class Savings_Account(Bank_Account):
     interest_rate = 0.025 # pre-set to 0.25%
 
     def __init__(self, account_number: str, first_name: str = "", last_name: str = "") -> None:
@@ -56,7 +56,7 @@ class Bank_Account_App:
     def add_account(self, account):
         self._accounts[account.account_number] = account
         
-    def get_account(self, account_number: str) -> Bank_Accounts:
+    def get_account(self, account_number: str) -> Bank_Account:
         return self._accounts.get(account_number, None)
     
     def close_account(self, account_number):
@@ -325,7 +325,7 @@ class TK_UI:
         self.c_last_name_error_label = tk.Label(frame_var, text="Please enter last name",fg=self.left_frame_bg, bg=self.left_frame_bg)
         self.c_last_name_error_label.grid(row=4, column=1, sticky='ew', padx=5, pady=0, columnspan=2)
         # Confirmation Button
-        self.c_create_account_button = tk.Button(frame_var, text="Open Current Account", command=self.create_account('c'), font=('Arial', 12))
+        self.c_create_account_button = tk.Button(frame_var, text="Open Current Account", command=self.creating_current_account, font=('Arial', 12))
         self.c_create_account_button.grid(row=5, column=1, padx=5, pady=5, sticky='ew', columnspan=2)
         
         ## Savings Account Field
@@ -346,7 +346,7 @@ class TK_UI:
         self.s_last_name_error_label = tk.Label(frame_var, text="Please enter last name",fg=self.righ_frame_bg, bg=self.righ_frame_bg)
         self.s_last_name_error_label.grid(row=4, column=1, sticky='ew', padx=5, pady=0, columnspan=2)
         # Confirmation Button
-        self.s_create_account_button = tk.Button(frame_var, text="Open Savings Account", command=self.create_account('s'), font=('Arial', 12))
+        self.s_create_account_button = tk.Button(frame_var, text="Open Savings Account", command=self.creating_savings_account, font=('Arial', 12))
         self.s_create_account_button.grid(row=5, column=1, padx=5, pady=5, sticky='ew', columnspan=2)
     
     def destroy_initial_controls(self,is_ca:bool=True):
@@ -435,7 +435,7 @@ class TK_UI:
             self.right_title.config(text=f"Current Account for '{self.current_account.first_name} {self.current_account.last_name}'. Account Number: {self.current_account.account_number}")
             self.destroy_initial_controls()
 
-    def create_account(self, account_type):
+    def create_account(self, account_type): #Test merging
         # Initialize variables
         first_name, last_name = '', ''
         
