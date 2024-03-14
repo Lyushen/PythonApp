@@ -7,6 +7,7 @@ from ExternalFuncs import ask_in_range,ask_a_question,style,safe_cast,Timer
 import tkinter as tk
 from tkinter import ttk,messagebox
 import doctest
+from doctest import testmod
 from threading import Thread
 
 def main():
