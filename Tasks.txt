@@ -52,7 +52,7 @@ Expected:
 
 
 
-Task 3 – Understanding Event-Driven Programming (20 Marks)
+Task 3 – Understanding Event-Driven Programming
 In addition to the software developed, your manager has requested a report on the following two points to help other developers within the company further understand the EDP paradigm.
 A) Explain the key principles of the Event-Driven Programming paradigm and outline some of the primary ways in which it is used for software development.
 B) Detail some of the ways in which applications built using EDP can be tested in terms of methodologies, tools and libraries within python. Provide examples where possible.
@@ -60,7 +60,7 @@ B) Detail some of the ways in which applications built using EDP can be tested i
     Task 3A TIPS:
 Main: Clearly defined and explained EDP
     Recommendation:
-- 1-2 paragraphs explaining the key principles EDP and how it is implemented in Tkinter(Event,EvMainLoop)
+- 1-2 paragraphs explaining the key principles EDP and how it is implemented in Tkinter(Event,MainLoop)
 - Code Snippet (from application or generic) expecting:
     + A typical Button Command (code and explanation)
     + Widgent's after event (optional)

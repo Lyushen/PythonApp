@@ -1,26 +1,26 @@
 import tkinter as tk
-from tkinter import ttk,messagebox,filedialog,Entry,Scrollbar,Button,Menu#,Frame,Label
+from tkinter import ttk,messagebox,filedialog,Entry,Scrollbar,Button,Menu
 import os,ctypes
 from task_manager import Task_Manager
 from db_io import Database_IO,RELATIVE_PY_PATH,safe_cast
 
 class UI(tk.Tk):
     def __init__(self) -> None:
-        """The initialisation of our GUI interface, as we inherit from tk.Tk parent, we can refer to self as to root. It simplifies interaction with root. Instead of using self.root. all the time, we refer to self.        """
+        """The initialisation of our GUI interface, as we inherit from tk.Tk parent, we can refer to self as to the root. It simplifies interaction with root. Instead of using self.root. all the time, we refer to self."""
         super().__init__() # Inherits of the root
-        self.el_manager=Task_Manager() # Initialisation of the instance of Element_Manager, that will be stroing and responsible for interaction our database list
-        self.db_ref = Database_IO(self.el_manager) #  The passsage of the reference to ensure that we use only one Element_Manager.todo_list
+        self.el_manager=Task_Manager() # IInitialisation of the instance of Element_Manager, that will be storing and responsible for interaction with our database list
+        self.db_ref = Database_IO(self.el_manager) #  The passage of the reference to ensure that we use only one Element_Manager.todo_list
         self.title("To-Do List")
         self.geometry("700x370+700+200")
-        self.resizable(width=False, height=False) # Do not allow user to change the main window size
+        self.resizable(width=False, height=False) # Do not allow a user to change the main window size
         self.font=('Tahoma',12) # Default font
-        self.entry_box_def_message="Enter your todo here..." # Message for enter_box Entry, as we use it multiple times, we better to store it once
-        self.entry_var = tk.StringVar() # Setup a string variable that will be attached to entry box to track changes and disable or enable add button
-        if os.name == 'nt': ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID() # Apply icon to current app_id. Usable to apply icon to Windows' Taskbar using ctypes library. To avoid issues we check if that is Windows to use windll library. May not work as intended as it's not compiled exe version.
+        self.entry_box_def_message="Enter your todo here..." # Message for enter_box Entry, as we use it multiple times, we better store it once
+        self.entry_var = tk.StringVar() # Setup a string variable that will be attached to the entry box to track changes and disable or enable the add button
+        if os.name == 'nt': ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID() # Apply icon to current app_id. Usable to apply an icon to Windows' Taskbar using ctypes library. To avoid issues we check if that is Windows to use Windll library. May not work as intended as it's not compiled exe version.
         self.iconbitmap(default=RELATIVE_PY_PATH + '/database/ico/to-do-list.ico')
         self.on_start() # Initialization stage where we create controls and read our db file
-        self.protocol("WM_DELETE_WINDOW", self.on_exit_app) # creating track for the even when we close the app with X
-        self.last_sort_col = None # Sorting variables. Remember last sorted column
+        self.protocol("WM_DELETE_WINDOW", self.on_exit_app) # creating tracks for the even when we close the app with X
+        self.last_sort_col = None # Sorting variables. Remember the last sorted column.
         self.sort_reverse = False 
         self.dragged_item = None
         self.scroll_enabled=False
@@ -32,7 +32,7 @@ class UI(tk.Tk):
         self.ui_read_file()
 
     def create_controls(self):
-        """The function is responsible to create GUI interface and assign multiple events"""
+        """The function is responsible to create GUI interface and assign multiple events."""
         # Applying styling to Treeview and main form background
         style = ttk.Style(self) # style.theme_use("calm")
         style.configure("Treeview", background="#FDE8B4", fieldbackground="#FEEFCD")
@@ -56,8 +56,8 @@ class UI(tk.Tk):
         # Add button creation
         self.add_btn = tk.Button(self, text='Add', font=self.font, command=self.add_task, width=10)
         self.add_btn.grid(column=2, row=0, sticky='e', pady=10, padx=10)
-        self.add_btn.config(state='disabled') # By default, it will be disabled, as no elements selected in a Treeview filed
-        self.add_btn.bind('<Button-1>', self.on_disabled_add_btn) # Even if the button disabled, we still are able to track pressing, in our case we use it to focus on the Enry Box
+        self.add_btn.config(state='disabled') # By default, it will be disabled, as no elements are selected in a Treeview filed
+        self.add_btn.bind('<Button-1>', self.on_disabled_add_btn) # Even if the button is disabled, we still can track pressing, in our case we use it to focus on the Entry Box
         # Treeview widget used from tkinter.ttk library to display our todo_list
         self.tree = ttk.Treeview(self, columns=('ID', 'Title', 'Description', 'Alarm', 'Done'), show='headings', selectmode='extended')
         self.tree.heading('ID', text='ID', command=lambda: self.tree_sort_column('ID')) # Assigning sorting events
@@ -130,47 +130,46 @@ class UI(tk.Tk):
 
     # DB file interaction
     def on_open_file(self,*_): # Extra function to ensure to save changes if there are some and call 
-        """This is the event that trigers when we have unsaved changes before we open a new file
-        If there was any changes, the flag self.el_manager.is_modified will be True, in this case we call function on_unsaved_changes and passing our ui_open_file callback function when we done asking to save changes. Otherwise we just call ui_open_file to open file"""
+        """This is the event that triggers when we have unsaved changes before opening a new file.
+        If there were any changes, the flag self.el_manager.is_modified will be True, in this case, we call function on_unsaved_changes and pass our ui_open_file callback function when we're done asking to save changes. Otherwise, we just call ui_open_file to the open file."""
         if self.el_manager.is_modified: 
             self.on_unsaved_changes(self.ui_open_file)
         else:
             self.ui_open_file()
     
     def ui_open_file(self):
-        """This UI function-event asks a user to select a database file, and if we have a new path, we redefine the default path and will be working with that file from now on"""
+        """This UI function asks a user to select a database file, and if we have a new path, we redefine the default path and will be working with that file from now on."""
         file_path = filedialog.askopenfilename(
             initialdir=self.db_ref.database_dir,  # Starting directory for the open_file dialog
             title="Select file",
             filetypes=(("Text or CSV database file", "*.txt *.csv"), ("all files", "*.*"))  # File filters
         )
         if file_path: # If a file was selected (not cancelled)
-            if self.db_ref.db_read_file(self.update_ui_tree,file_path): # If we read the file and pass new file path, also pass our update ui function to update the tree with new information
+            if self.db_ref.db_read_file(self.update_ui_tree,file_path): # If we read the file and pass a new file path, also pass our update UI function to update the tree with new information
                 self.el_manager.is_modified = False # We read fresh new data, and set is_modified to false to reflect the fresh stage for the on_unsaved_changes question
 
     def ui_save_file(self,*_):
-        """An internal function-event intends to call the external db_save_file function from the DB class"""
+        """An internal function-event intends to call the external db_save_file function from the DB class."""
         self.db_ref.db_save_file()
     
     def ui_read_file(self,*_):
-        """An internal function-event intends to call the external db_read_file function from the DB class"""
+        """An internal function-event intends to call the external db_read_file function from the DB class."""
         self.db_ref.db_read_file(self.update_ui_tree)
 
     def on_exit_app(self,*_):
-        """A function-event intends to call the on_unsaved_changes function-question and as callback, we pass root.quit() if we finish successfully, otherwise if changes have not been detected, we exit the application"""
+        """A function-event intends to call the on_unsaved_changes function-question and as a callback, we pass root.quit() if we finish successfully, otherwise if changes have not been detected, we exit the application."""
         if self.el_manager.is_modified:
             self.on_unsaved_changes(self.quit)
         else:
             self.quit()
     
     def on_unsaved_changes(self,callback:callable):
-        """Function Event if there changes have been detected we call save and callback optional function
+        """Function Event if changes have been detected we call save and callback optional function.
 
         Args:
-            callback (callable): This callable variable we use to pass execution in succesfull cases
+            callback (callable): This callable variable we use to pass execution in succesfull cases.
 
-        Returns: If user_choice is None, it means Cancel was selected, so we do nothing and return from the function
-        """
+        Returns: If user_choice is None, it means Cancel was selected, so we do nothing and return from the function."""
         user_choice = messagebox.askyesnocancel("You have unsaved changes", "Do you want to save changes?")
         if user_choice is True:  # Save
             self.db_ref.db_save_file()
@@ -181,7 +180,7 @@ class UI(tk.Tk):
     
     # Actual functionality
     def update_ui_tree(self):
-        """Updated our Tree in a way to recreate it, it's a more efficient way to interact with the Tree instead of iterating trough the tree values to delete some index """
+        """Updated our Tree in a way to recreate it, it's a more efficient way to interact with the Tree instead of iterating through the tree values to delete some index."""
         self.undo_button_state_check()
         for item in self.tree.get_children():
             self.tree.delete(item)
@@ -190,7 +189,7 @@ class UI(tk.Tk):
             self.tree.insert('', 'end', values=(inx+1, el.title, el.details, el.alarm_target_time, done_status))
 
     def add_task(self,*_):
-        """The function adds task elements to the todo storage list. Also we update the tree and clear previous entry and out-focus the entrybox 
+        """The function adds task elements to the to-do storage list. Also, we update the tree, clears previous entries and out-focus the entry_box.
         This function also has an additional optional parameter to make it callable as an event."""
         title = self.entry_box.get().strip()
         if title != self.entry_box_def_message and title != "":
@@ -200,27 +199,27 @@ class UI(tk.Tk):
             self.focus()
 
     def delete_task(self,*_):
-        """Deletion number of tasks, possible multiple selection and delete multiple. And updates the tree. Has DELETE hotkey.
+        """Deletion number of tasks, possible multiple selections and delete multiple. And updates the tree. Has DELETE hotkey.
         This function also has an additional optional parameter to make it callable as an event."""
         selected_indices = [self.tree.index(item) for item in self.tree.selection()] # Retrieve the correct index
         self.el_manager.delete_elements_by_ids(selected_indices) # delete elements by indexes
         self.update_ui_tree()
     
     def complete_task(self,*_):
-        """Completing tasks with multiple selection. And updates the tree.
+        """Completing tasks with multiple selections. And updates the tree.
         This function also has an additional optional parameter to make it callable as an event."""
         indexes_to_toggle = [self.tree.index(item) for item in self.tree.selection()]  # Retrieve the correct index
         self.el_manager.complete_element(indexes_to_toggle) # call the complete method with the list of indexes
         self.update_ui_tree()
 
     def undo(self,*_):
-        """Undo added,deleted or completed tasks one action by the time. And updates the tree. Has Ctrl+Z hotkey.
+        """Undo added, deleted or completed tasks one action by the time. And updates the tree. Has CTRL+Z hotkey.
         This function also has an additional optional parameter to make it callable as an event."""
         self.el_manager.undo()
         self.update_ui_tree()
         
     def undo_button_state_check(self):
-        """In each update tree call we check if there is history for UNDO action, if there is, we enable button, otherwise history has no stored actions. The same for context menu option."""
+        """In each update tree call, we check if there is history for UNDO action, if there is, we enable the button, otherwise history has no stored actions. The same is for context menu option."""
         if len(self.el_manager.history)>0:
             self.undo_btn.config(state='normal')
             self.context_menu.entryconfig("Undo", state="normal")
@@ -239,7 +238,7 @@ class UI(tk.Tk):
         self.update_ui_tree()
     
     def select_all(self,*_):
-        """Select All function when tree is focused. Has CTRL+A hotkey.
+        """Select All function when the tree is focused. Has CTRL+A hotkey.
         This function also has an additional optional parameter to make it callable as an event."""
         self.tree.selection_set(self.tree.get_children())
         
@@ -264,7 +263,7 @@ class UI(tk.Tk):
             print(f'Error in context menu:{e}')
 
     def tree_sort_column(self, col:str):
-        """Sorting tree by clecking on a column header. Prioritizing Ascending sorting. Only if you already selected column press second time - Descending order will apply.
+        """Sorting tree by clicking on a column header. Prioritizing Ascending sorting. Only if you already selected column press the second time - Descending order will apply.
 
         Args:
             col (str): Column name
@@ -316,13 +315,13 @@ class UI(tk.Tk):
             self.duplicate_btn.config(state='normal')
 
     def clear_placeholder(self,entry_box, default_message:str,*_):
-        """Function-event that clear placeholder massage when we focusing it"""
+        """Function-event that clear placeholder massage when focused."""
         if entry_box.get() == default_message:
             entry_box.delete(0, tk.END)
             entry_box.config(fg='black')
 
     def restore_placeholder(self,entry_box, default_message:str,*_):
-        """Function-event that restore the placeholder massage when we unfocus it"""
+        """Function-event that restores the placeholder message when unfocused."""
         if entry_box.get() == "":
             entry_box.config(fg='grey')
             entry_box.insert(0, default_message)
