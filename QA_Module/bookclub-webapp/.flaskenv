@@ -1,0 +1,2 @@
+FLASK_APP=bookclub.py
+FLASK_DEBUG=1
