@@ -1,5 +1,8 @@
 cd bookclub-webapp
 py -m venv .\venv
+
 .\venv\scripts\activate
 pip install -r requirements.txt
 flask run
+
+cd QA_Module\bookclub-webapp\ && .\venv\Scripts\activate && flask run
