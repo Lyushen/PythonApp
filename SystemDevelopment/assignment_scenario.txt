@@ -36,10 +36,10 @@ B) Make contact with the client (your tutor) and using your proposed strategy co
 
 Task 2 – System Design Documentation (35 Marks)
 Using the information gathered for Task 1B, produce robust and detailed design documentation which should include at least the following categories of documents:
+- Requirement Specification
+- Logical Designs
+- Physical Designs
 
-Requirement Specification
-Logical Designs
-Physical Designs
 Task 3 – Understanding the System Development Life Cycle and Processes (30 Marks)
 Using an appropriate software development methodology, complete the following:
 A) Create comprehensive planning documentation for the development of the system. Your documentation should clearly detail each stage of the development life cycle with explicit consideration for quality assurance, version control plans, timeframes, and contingencies.
