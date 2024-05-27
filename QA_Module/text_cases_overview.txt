@@ -1,0 +1,69 @@
+Test Case ID Test Title Description Expected Results Actual Results
+FR-001-A Register a new account (Case A). The user with typical credentials registers a new account on the platform.A new account is successfully created, and confirmation is received.[Passed]As expected.
+FR-001-B Register a new account (Case B). Register with edge-case credentials and a weak passwordA new account is successfully created, and confirmation is received as the Application functionality does not require a strong password [Passed]As expected.
+FR-001-C Register a new account (Case C). Register with existing username and email, using credentials from the FR-001-A test case. The error message is displayed about username and/or email already existing. [Passed] As expected.
+FR-002-A Login to existing accounts (Case A) The user logs in to an existing account using FR-001-B credentials.The user is successfully logged in and redirected to the home (index) page. [Passed]As expected.
+FR-002-B Login to existing accounts (Case B) Login with an incorrect passwordAn error message is displayed: The username or password is incorrect. [Passed]As expected.
+FR-002-C Log in to existing accounts (Case C) Login attempt with an unregistered username An error message is displayed: The username or password is incorrect [Passed]As expected.
+FR-003-A Create a post (Case A) The user creates a new post with max characters.A new post with max characters is successfully created and visible on the user's profile. [Passed]As expected.
+FR-003-B Create a post (Case B) The user creates a new post with over maximum characters.A new post fails to appear on the user's profile after creation due to the 140-character limit. [Failed/Medium] The maximum allowed length should be 140.
+FR-003-C Create a post (Case A) Create a post with special characters A new post with special characters is successfully created and visible on the user's profile. [Passed]As expected.
+FR-004-A View existing posts (Case A) The user views posts from the current user.
+Target profile Oisín N'Gallagher The user can see the posts made by himself starting from the recent ones. [Passed]As expected.
+FR-004-B View existing posts (Case B) The user views posts from other users. 
+The user can see and interact with posts from other users. [Passed]As expected.
+FR-004-C View existing posts (Case C) The user views the posts of a specific user.
+Target profile Caoime Ni Chathasaigh The user can see and interact with posts from the selected profile. [Passed]As expected.
+FR-005-A Follow profiles (Case A) The user follows another profile.
+Target profile Caoime Ni Chathasaigh The user is now following the profile, and updates from this profile appear in the user's feed. [Passed]As expected.
+FR-005-B Follow a profile already followed (Case B) Attempt to follow a profile that the user is already following.
+Target profile Caoimhe Ni Chathasaigh The system prevents the action and may display a message indicating the user already follows the profile. [Failed/Non-Critical] The system didn’t prevent the action, instead, the following procedure was executed a second time, which didn’t cause any error, but still should be processed by the application.
+FR-005-C Follow a non-existent profile (Case C) Attempt to follow a profile that does not exist. 
+Target non-existent profile username ‘user123’ The system displays an error message indicating the profile does not exist. [Passed]As expected.
+FR-006-A Unfollow a profile successfully (Case A) A user successfully unfollows another user's profile. The user is no longer following the profile and will not see new updates in their feed. [Passed]As expected.
+FR-006-B Unfollow a profile not followed (Case B) Attempt to unfollow a profile the user does not follow.
+Target profile Caoimhe Ni Chathasaigh The system does not display an 'Unfollow' button. [Passed]As expected. 
+FR-006-C Unfollow a non-existent profile Attempt to unfollow a profile that does not exist.
+The system displays an error message indicating the profile does not exist and the unfollow action won’t be executed [Passed]As expected. The Error message appeared and the user was redirected to the Home page.
+FR-007-A View profiles The user views the details of a profile of another user. Log in to the user account.
+Target profile Caoimhe Ni Chathasaigh Profile details are visible including posts, followers, and following count. [Passed]As expected.
+FR-007-B View a profile from a post A user navigates to a profile by clicking on the username ‘Caoimhe Ni Chathasaigh’ from a post. Target profile Caoimhe Ni Chathasaigh The system navigates to the profile page of the user linked from the post. [Passed]As expected.
+FR-007-C Attempt to view a private or non-existent profile A user tries to view a profile that is set to private or does not exist. Non-existent ‘user123’ profile The system displays a message that the profile does not exist. [Passed]As expected.
+FR-008-A Change username successfully The user changes their username. New Username set to ‘Oisín N'Gallagher1’
+The username is successfully updated. [Passed]As expected.
+FR-008-B Change username to an already taken username A user attempts to change their username to one that is already in use by another account. Log in to the user account.
+Attempt to change the username to one known to be already taken. Set the Username to ‘Caoimhe Ni Chathasaigh’The system rejects the change and displays an error message indicating the username is already taken. [Passed]As expected.
+FR-008-C Change username to an invalid format A user attempts to change their username to one that does not meet the format requirements (e.g., too long, contains multiple invalid characters). Very long and invalid username format The system prevents the username change and displays an error message about the invalid format. [Failed/Critical] The system didn’t prevent the action, it renamed to an invalid format username, which could cause significant errors for other users or significantly slow down the system. The Critical Error should be fixed.
+FR-009-A Customize the ‘About Me’ section of your own profile A user successfully updates the ‘About Me’ section of their profile. 
+New ‘About Me’ text The system saves the changes and displays the updated ‘About Me’ on the user profile. [Passed]As expected.
+FR-009-B Update the ‘About Me’ section with an excessive character limit A user attempts to update the ‘About Me’ section with text exceeding the character limit. Excessively long ‘About Me’ text The system does not save the text and shows an error message regarding the character limit. [Passed]As expected. 
+FR-009-C Clear ‘About Me’ section A user clears all text from the ‘About Me’ section of their profile. Empty text field The system saves the changes and displays an empty ‘About Me’ section on the profile. [Passed]As expected.
+FR-010-A See when a profile was last active A user views the last active time displayed on the current user's profile. The profile page shows the last active time correctly based on the user's last login or activity. [Passed]As expected. 
+FR-010-B Last active time updates on activity Verify that a user’s last active time updates when they perform an activity (e.g., posting). Any message content for the post The profile's last active time updates to reflect the time of the last post.  [Failed/Critical] The user’s Last activity time was updated on login, not on the post-activity, which could cause privacy concerns.
+FR-010-C Verify display of approximate post time Ensure that the system correctly displays the approximate time a post was made.  Each post should display an approximate time since posting, such as "a few seconds ago," "5 minutes ago," "2 hours ago," "yesterday," "2 days ago," etc., based on the current time and the post creation timestamp. [Passed]As expected.
+FR-011-A See how many followers a profile has The user checks how many followers a profile has. Number of followers is visible on the profile.  [Passed]As expected.
+FR-011-B Update follower counts after new follow Verify that the follower count updates immediately after a new user follows the profile. The follower count on the primary user’s profile increments by one immediately after the follow.  [Passed]As expected.
+FR-011-C Follower count accuracy with unfollow action Ensure the follower count decreases accurately when a user unfollows the profile.
+Revisit the unfollowed user's profile to check the updated follower count. [Passed]As expected.
+FR-012-A See how many people a profile is following The user checks how many people a profile is following. The number of people the profile is following is visible. [Passed]As expected.
+FR-012-B Following count updates after new follow Verify that the following count updates correctly when a user follows a new profile. The user's profile page shows an incremented following count. [Passed]As expected.
+FR-012-C View own following count after unfollowing A user unfollows another user and checks if their own following count decreases.
+The following count on the user’s profile decreases by one. [Passed]As expected.
+FR-013 Customize their own avatar using the Gravatar service The user customizes their avatar using Gravatar.
+A new avatar that has been attached through the Gravatar service is successfully displayed on the profile page in the local application. [Passed] As expected, the Gravatar service successfully provided the uploaded image from the user’s Avatar page and the application successfully attached it to the user’s profile.
+FR-014-A View a feed of posts from profiles being followed The user views a feed of posts from profiles they are following. The feed displays posts from all profiles the user is following in reverse chronological order. [Passed]As expected.
+FR-014-B Feed updates after following a new profile Verify that the feed updates to include posts from a newly followed profile. The newly followed profile is Oisín N'Gallagher The feed now includes posts from the newly followed profile. [Passed]As expected.
+FR-014-C No posts in feed from unfollowed profiles Ensure that the feed does not show posts from profiles after they have been unfollowed. The unfollowed profile is Oisín N'Gallagher The feed no longer shows posts from the unfollowed profile. [Passed]As expected.
+
+NFR-001 User profiles on the site can only be changed by the owner of the profile Verify that the profile owner can successfully modify their profile information. New profile name admin1 Changes are saved and reflected on the profile. [Passed]As expected.
+NFR-002 The site shall be efficient and easy to use Evaluate the site's usability and efficiency. The site is user-friendly, and error-free with quick load times and intuitive navigation. [Passed]As expected.
+NFR-003 Viewing posts on the site shall require registration to the site The site requires users to register before they can view posts. Posts are not visible without registration. After registration, posts are accessible. [Passed]As expected.
+
+Additional extra test cases were taken from The Assessment Scenario Documentation but weren't mentioned in the test cases list.
+FR-015 Posts will be made up of any characters of a length from 1 to 140 Ensure posts can be created with any length within the specified range. Post content of various lengths Post creation is successful for lengths from 1 to 140 characters and fails for lengths beyond 140. [Failed/Non-Critical]The actual maximum allowed length is 160.
+FR-016 Each and every feed shall support pagination to the degree of ten posts being displayed per page Verify the pagination supports displaying exactly ten posts per page. Each page should display exactly ten posts until there are fewer than ten remaining. [Failed/Non-Critical]
+Each page shows only 9 posts.
+FR-017 The user should not be able to click ‘newer posts’ or ‘older posts’ if there are none of the desired left to view Ensure the navigation buttons for newer and older posts are disabled when appropriate. The ‘Older Posts’ buttons are disabled when there are no more posts to navigate to. [Passed]As expected.
+FR-018 Only users registered to the site should be able to view posts on the site. Confirm that viewing posts requires user registration.  Unregistered users cannot view posts, and a prompt to log in or register is displayed; registered users can view posts. [Passed]As expected.
+FR-019-A Users should not be able to follow themselves Ensure users cannot follow their own profiles. A Related Error message should appear emphasising the impossibility of the action [Passed]As expected.
+FR-019-B Users should not be able to Unfollow themselves Ensure users cannot unfollow their own profiles. A related Error message should appear emphasising the impossibility of the action [Passed]As expected.
