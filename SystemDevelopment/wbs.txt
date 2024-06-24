@@ -1,0 +1,31 @@
+@startwbs
+* .
+** Remote Ordering and Digital Menu System Project
+*** 1. Project Management
+**** 1.1 Planning and Initiation
+**** 1.2 Monitoring and Control
+*** 2. Requirement Specification
+**** 2.1 Functional Requirements
+**** 2.2 Non-Functional Requirements
+*** 3. Design Phase
+**** 3.1 Logical Designs
+**** 3.2 Physical Designs
+*** 4. Development Phase
+**** 4.1 Backend Development
+**** 4.2 Frontend Development
+**** 4.3 Integration
+*** 5. Testing Phase
+**** 5.1 Unit Testing
+**** 5.2 Integration Testing
+**** 5.3 User Acceptance Testing
+*** 6. Deployment Phase
+**** 6.1 Preparation
+**** 6.2 System Deployment
+**** 6.3 Post-Deployment
+*** 7. Documentation and Training
+**** 7.1 Documentation
+**** 7.2 Training
+*** 8. Project Closure
+**** 8.1 Review and Sign-Off
+**** 8.2 Lessons Learned
+@endwbs

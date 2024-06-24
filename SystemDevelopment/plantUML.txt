@@ -1,0 +1,98 @@
+@startuml
+skinparam packageStyle rectangle
+
+actor "User" as user
+actor "Canteen Staff" as staff
+
+package "Client Side" {
+  [Web Application] as webapp
+  [Mobile Application] as mobileapp
+  
+  package "User Interface Components" {
+    [Login/Register] as login
+    [Menu Browsing] as menu
+    [Shopping Cart] as cart
+    [Order Placement] as orderplace
+    [Order Tracking] as ordertrack
+    [User Profile] as profile
+  }
+}
+
+package "Server Side" {
+  [RESTful API] as api
+  
+  package "Core Services" {
+    [User Management] as usermgmt
+    [Menu Management] as menumgmt
+    [Order Management] as ordermgmt
+    [Payment Processing] as paymentproc
+    [Notification Service] as notify
+  }
+  
+  database "Database" {
+    [Users] as userdb
+    [Menu Items] as menudb
+    [Orders] as orderdb
+    [Payments] as paymentdb
+  }
+  
+  [Authentication & Authorization] as auth
+}
+
+cloud "External Services" {
+  [Payment Gateway] as paymentgw
+  [Email Service] as email
+  [SMS Service] as sms
+}
+
+' User interactions
+user --> webapp
+user --> mobileapp
+staff --> webapp
+
+' Client-side component interactions
+webapp --> login
+webapp --> menu
+webapp --> cart
+webapp --> orderplace
+webapp --> ordertrack
+webapp --> profile
+
+mobileapp --> login
+mobileapp --> menu
+mobileapp --> cart
+mobileapp --> orderplace
+mobileapp --> ordertrack
+mobileapp --> profile
+
+' Client to Server communications
+login --> api
+menu --> api
+cart --> api
+orderplace --> api
+ordertrack --> api
+profile --> api
+
+' API to Core Services
+api --> auth
+api --> usermgmt
+api --> menumgmt
+api --> ordermgmt
+api --> paymentproc
+api --> notify
+
+' Core Services to Database
+usermgmt --> userdb
+menumgmt --> menudb
+ordermgmt --> orderdb
+paymentproc --> paymentdb
+
+' External Service Integrations
+paymentproc --> paymentgw
+notify --> email
+notify --> sms
+
+' Staff interactions
+staff --> menumgmt
+staff --> ordermgmt
+@enduml
